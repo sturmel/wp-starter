@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/wordpress/Dockerfile
-    container_name: 'wordpress'
+    container_name: 'wordpress-bedrock'
     stdin_open: true
     tty: true
     ports:
