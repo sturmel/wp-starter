@@ -27,6 +27,15 @@ else
   wp plugin install w3-total-cache --path=/var/www/html --allow-root
   wp plugin install all-in-one-wp-migration --path=/var/www/html --allow-root
 
+  # Activate plugins
+  wp plugin activate advanced-custom-fields --path=/var/www/html --allow-root
+  wp plugin activate wordpress-seo --path=/var/www/html --allow-root
+  wp plugin activate wordfence --path=/var/www/html --allow-root
+  wp plugin activate contact-form-7 --path=/var/www/html --allow-root
+  wp plugin activate complianz-gdpr --path=/var/www/html --allow-root
+  wp plugin activate w3-total-cache --path=/var/www/html --allow-root
+  wp plugin activate all-in-one-wp-migration --path=/var/www/html --allow-root
+
   # Uninstall Hello Dolly plugin
   wp plugin uninstall hello --path=/var/www/html --allow-root
   
