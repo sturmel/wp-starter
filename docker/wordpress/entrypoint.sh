@@ -3,6 +3,11 @@
 # Set errexit to exit immediately if a command exits with a non-zero status
 set -e
 
+# Load NVM environment
+export NVM_DIR="/usr/local/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 # Check if the html directory is empty
 if [ "$(ls -A /var/www/html)" ]; then
   echo "html directory is not empty. Skipping Bedrock installation."
@@ -57,7 +62,11 @@ EOF
 
   cd web/app/themes
 
-  composer create-project roots/sage lugh-web
+  composer create-project roots/sage sage
+
+  cd sage
+  npm install
+  npm run build
 
   echo "Bedrock installed successfully!"
 fi

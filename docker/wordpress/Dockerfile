@@ -2,7 +2,7 @@ FROM php:8.2-apache
 
 RUN a2enmod rewrite
 
-RUN apt-get update && apt-get install -y git unzip zip
+RUN apt-get update && apt-get install -y git unzip zip curl
 
 WORKDIR /var/www/html
 
@@ -14,6 +14,18 @@ COPY --from=composer:2.0 /usr/bin/composer /usr/local/bin/composer
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
+
+# Install nvm (Node Version Manager)
+ENV NVM_DIR /usr/local/nvm
+RUN mkdir -p $NVM_DIR
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# Load nvm environment variables
+ENV NODE_VERSION="22.11"
+RUN bash -c ". $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use $NODE_VERSION"
+
+# Add node and npm to PATH
+ENV PATH="${NVM_DIR}/versions/node/${NODE_VERSION}/bin:${PATH}"
 
 COPY ./docker/wordpress/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
