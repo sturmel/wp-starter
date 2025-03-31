@@ -1,64 +1,122 @@
-# wp-starter
+# Bedrock/Sage WordPress Starter with Docker
 
-A WordPress starter project using Docker Compose for local development.
+This project provides a Docker-based development environment for a WordPress site using Bedrock and Sage.
 
 ## Prerequisites
 
 *   Docker
 *   Docker Compose
 
-## Getting Started
+## Setup
 
-1.  Clone the repository:
-
-    ```bash
-    git clone <repository_url>
-    cd wp-starter
-    ```
-
-2.  Start the containers:
+1.  **Clone the repository:**
 
     ```bash
-    docker-compose up --build
+    git clone <your-repository-url>
+    cd <your-repository-directory>
     ```
 
-3.  Access the WordPress site in your browser at `http://localhost:8101`.
+2.  **Start the Docker containers:**
+
+    ```bash
+    docker-compose up -d
+    ```
+
+    This will build and start the following containers:
+
+    *   `wordpress_db`: MySQL database for WordPress.
+    *   `wordpress-bedrock`: WordPress application running Bedrock.
+
+3.  **Access the WordPress site:**
+
+    Open your web browser and navigate to `http://localhost:8101`.
+
+## Key Components
+
+*   **Bedrock:** A modern WordPress boilerplate with improved folder structure, dependency management (Composer), and environment configuration (`.env`).
+*   **Sage:** A WordPress starter theme featuring a modern development workflow, including Blade templating, Sass, and Webpack (or Vite).
+*   **Docker:** A containerization platform for creating isolated and reproducible development environments.
+*   **Docker Compose:** A tool for defining and managing multi-container Docker applications.
+
+## Directory Structure
+
+*   `.`: Root directory containing `docker-compose.yml` and other configuration files.
+*   `html`: WordPress root directory.  This is where Bedrock is installed.
+*   `html/web/app/themes/sage`: Sage theme directory.
+*   `docker`: Contains Docker-related files.
+    *   `docker/wordpress/Dockerfile`: Dockerfile for building the WordPress image.
+    *   `docker/wordpress/entrypoint.sh`: Entrypoint script for initializing the WordPress container.
+    *   `docker/wordpress/apache/sites-enabled`: Apache configuration files.
+    *   `docker/wordpress/php/php.ini`: PHP configuration file.
 
 ## Configuration
 
-The project uses the following environment variables:
+*   **`docker-compose.yml`:** Defines the services, networks, and volumes for the Docker application.  You can adjust port mappings, environment variables, and resource limits in this file.
+*   `.env`:** (Created by `entrypoint.sh`) Contains environment-specific settings for Bedrock, such as database credentials and WordPress URLs.  **Important:** Do not commit this file to version control.
+*   `html/web/app/themes/sage/config/app.php` : Sage configuration file.
 
-*   `MYSQL_ROOT_PASSWORD`: The password for the MySQL root user.
-*   `MYSQL_USER`: The MySQL user for WordPress.
-*   `MYSQL_PASSWORD`: The password for the WordPress MySQL user.
-*   `MYSQL_DATABASE`: The name of the MySQL database for WordPress.
+## Development Workflow
 
-These variables are defined in the `docker-compose.yml` file.
+1.  **Access the WordPress container:**
 
-## Development
+    ```bash
+    docker exec -it wordpress-bedrock bash
+    ```
 
-The `html` directory is mounted as a volume to the `/var/www/html` directory in the `wordpress` container. This allows you to edit the WordPress files locally and see the changes reflected in the container.
+2.  **Navigate to the Sage theme directory:**
 
-## WP-CLI
+    ```bash
+    cd /var/www/html/web/app/themes/sage
+    ```
 
-WP-CLI is installed in the `wordpress` container and can be used to manage the WordPress installation.
+3.  **Install Node dependencies:**
 
-To access WP-CLI, you can use the following command:
+    ```bash
+    npm install
+    ```
 
-```bash
-docker-compose exec wordpress wp <command>
-```
+4.  **Start the development server:**
 
-## Plugins
+    ```bash
+    npm run dev
+    ```
 
-The following plugins are installed by default:
+    Or, if you're using Vite:
 
-*   Advanced Custom Fields
-*   Yoast SEO
-*   Wordfence
-*   Contact Form 7
-*   Complianz GDPR
-*   W3 Total Cache
-*   All-in-One WP Migration
+     ```bash
+    npm run dev
+    ```
 
-The `Hello Dolly` plugin is removed during the installation process.
+5.  **Develop your theme:**
+
+    Make changes to the theme files in the `html/web/app/themes/sage` directory. The development server will automatically rebuild the assets as you make changes.
+
+6.  **Build for production:**
+
+    ```bash
+    npm run build
+    ```
+
+    Or, if you're using Vite:
+
+     ```bash
+    npm run build
+    ```
+
+    This will generate optimized assets in the `html/web/app/themes/sage/public/build` directory.
+
+## Troubleshooting
+
+*   **"The asset manifest \[/var/www/html/web/app/themes/sage/public/manifest.json] cannot be found."**
+
+    *   Ensure that you have run `npm run build` (or `yarn build`) in the `sage` theme directory.
+    *   Verify that the `manifest.json` file exists in the `html/web/app/themes/sage/public/build` directory.
+    *   Double-check your Sage configuration to ensure it's correctly pointing to the `manifest.json` file.
+    *   If you're using Vite, ensure the `base` option in `vite.config.js` is correctly configured.
+
+## Additional Notes
+
+*   The `entrypoint.sh` script automates the Bedrock installation process and creates the `.env` file.
+*   The Dockerfile installs essential PHP extensions, Composer, WP-CLI, and Node.js.
+*   You can customize the Apache configuration by modifying the files in the `docker/wordpress/apache/sites-enabled` directory.
+*   You can customize the PHP configuration by modifying the `docker/wordpress/php/php.ini` file.
