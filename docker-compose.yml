@@ -1,0 +1,48 @@
+version: '3.8'
+
+networks:
+  wordpress-network:
+
+services:
+  wordpress_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_USER: 'docker'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_DATABASE: 'wordpress'
+    ports:
+      - '33016:3306'
+    volumes:
+      - wordpress_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "docker", "-ppassword"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - wordpress-network
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: ./docker/wordpress/Dockerfile
+    container_name: 'wordpress'
+    stdin_open: true
+    tty: true
+    ports:
+      - '8101:80'
+    working_dir: /var/www/html
+    volumes:
+      - ./html:/var/www/html
+      - ./docker/wordpress/apache/sites-enabled:/etc/apache2/sites-enabled
+      - ./docker/wordpress/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+    depends_on:
+      wordpress_db:
+        condition: service_healthy
+    networks:
+      - wordpress-network
+
+volumes:
+  wordpress_db:
