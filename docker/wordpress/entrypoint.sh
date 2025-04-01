@@ -23,18 +23,18 @@ else
   wp core install --path=/var/www/html --url=${WORDPRESS_SITE_URL} --title=${WORDPRESS_SITE_NAME} --admin_user=${WORDPRESS_ADMIN_USER} --admin_password=${WORDPRESS_ADMIN_PASSWORD} --admin_email=${WORDPRESS_ADMIN_EMAIL} --allow-root
 
   # Install plugins
-  wp plugin install wordpress-seo --activate --allow-root
+  wp plugin install wordpress-seo --allow-root
   wp plugin install wordfence --allow-root
-  wp plugin install contact-form-7 --activate --allow-root
-  wp plugin install complianz-gdpr --activate --allow-root
-  wp plugin install w3-total-cache --activate --allow-root
-  wp plugin install all-in-one-wp-migration --activate --allow-root
-  wp plugin install advanced-custom-fields --activate --allow-root
-  # composer require digitoimistodude/air-helper
-
-  wp theme install air-light --allow-root
+  wp plugin install contact-form-7 --allow-root
+  wp plugin install complianz-gdpr --allow-root
+  wp plugin install w3-total-cache --allow-root
+  wp plugin install all-in-one-wp-migration --allow-root
+  wp plugin install advanced-custom-fields --allow-root
 
   wp plugin uninstall hello --allow-root
+
+  cd /var/www/html/wp-content/themes
+  composer create-project upstatement/timber-starter-theme --no-dev
 fi
 
 # Start Apache

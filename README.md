@@ -72,7 +72,6 @@ The `docker/wordpress/entrypoint.sh` script is executed when the WordPress conta
 -   If empty, downloads and installs WordPress using `wp-cli`.
 -   Creates a `wp-config.php` file.
 -   Installs and activates several plugins.
--   Sets the default theme.
 -   Starts the Apache server.
 
 ## Docker Compose
