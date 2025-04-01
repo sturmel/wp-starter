@@ -10,9 +10,9 @@ export NVM_DIR="/usr/local/nvm"
 
 # Check if the html directory is empty
 if [ "$(ls -A /var/www/html)" ]; then
-  echo "html directory is not empty. Skipping Bedrock installation."
+  echo "html directory is not empty. Skipping installation."
 else
-  echo "html directory is empty. Installing Bedrock..."
+  echo "html directory is empty. Installing WordPress..."
 
   wp core download --path=/var/www/html --locale=fr_FR --version=latest --allow-root
 
