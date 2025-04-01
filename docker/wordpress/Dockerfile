@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 RUN a2enmod rewrite
 
@@ -15,17 +15,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-# Install nvm (Node Version Manager)
-ENV NVM_DIR /usr/local/nvm
-RUN mkdir -p $NVM_DIR
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs
 
-# Load nvm environment variables
-ENV NODE_VERSION="22.11"
-RUN bash -c ". $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use $NODE_VERSION"
-
-# Add node and npm to PATH
-ENV PATH="${NVM_DIR}/versions/node/${NODE_VERSION}/bin:${PATH}"
 
 COPY ./docker/wordpress/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

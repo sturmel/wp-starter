@@ -34,6 +34,16 @@ services:
     ports:
       - '8101:80'
     working_dir: /var/www/html
+    environment:
+      WORDPRESS_DB_NAME: 'wordpress'
+      WORDPRESS_DB_USER: 'docker'
+      WORDPRESS_DB_PASSWORD: 'password'
+      WORDPRESS_DB_HOST: 'wordpress_db'
+      WORDPRESS_ADMIN_USER: 'admin'
+      WORDPRESS_ADMIN_PASSWORD: 'password'
+      WORDPRESS_ADMIN_EMAIL: 'test@localhost.fr' 
+      WORDPRESS_SITE_URL: 'http://localhost:8101'
+      WORDPRESS_SITE_NAME: 'WordPress'
     volumes:
       - ./html:/var/www/html
       - ./docker/wordpress/apache/sites-enabled:/etc/apache2/sites-enabled
