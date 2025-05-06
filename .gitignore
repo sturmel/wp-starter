@@ -1,2 +1,5 @@
-html/*
-!html/
+.env
+/wp-content/uploads
+/wp-content/upgrade
+/wp-content/backup-db
+/wp-content/themes

@@ -1,58 +1,46 @@
-version: '3.8'
-
-networks:
-  wordpress-network:
-
 services:
-  wordpress_db:
+  db:
     image: mysql:8.0
+    volumes:
+      - db_data:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'password'
-      MYSQL_USER: 'docker'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_DATABASE: 'wordpress'
-    ports:
-      - '33016:3306'
-    volumes:
-      - wordpress_db:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "docker", "-ppassword"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     networks:
-      - wordpress-network
+      - wp_network
 
   wordpress:
-    build:
-      context: .
-      dockerfile: ./docker/wordpress/Dockerfile
-    container_name: 'wordpress'
-    stdin_open: true
-    tty: true
-    ports:
-      - '8101:80'
-    working_dir: /var/www/html
-    environment:
-      WORDPRESS_DB_NAME: 'wordpress'
-      WORDPRESS_DB_USER: 'docker'
-      WORDPRESS_DB_PASSWORD: 'password'
-      WORDPRESS_DB_HOST: 'wordpress_db'
-      WORDPRESS_ADMIN_USER: 'admin'
-      WORDPRESS_ADMIN_PASSWORD: 'password'
-      WORDPRESS_ADMIN_EMAIL: 'test@localhost.fr' 
-      WORDPRESS_SITE_URL: 'http://localhost:8101'
-      WORDPRESS_SITE_NAME: 'WordPress'
-    volumes:
-      - ./html:/var/www/html
-      - ./docker/wordpress/apache/sites-enabled:/etc/apache2/sites-enabled
-      - ./docker/wordpress/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+    image: wordpress:php8.3-apache
     depends_on:
-      wordpress_db:
-        condition: service_healthy
+      - db
+    ports:
+      - "${WORDPRESS_HOST_PORT}:80"
+    restart: always
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_URL: ${WORDPRESS_URL}
+      WORDPRESS_TITLE: ${WORDPRESS_TITLE}
+      WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
+      WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD}
+      WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
+    entrypoint: ["/usr/local/bin/custom-entrypoint.sh"]
+    command: ["apache2-foreground"]
     networks:
-      - wordpress-network
+      - wp_network
 
 volumes:
-  wordpress_db:
+  db_data:
+
+networks:
+  wp_network:
+    driver: bridge
