@@ -1,0 +1,116 @@
+{
+    // Section: Exclusion de fichiers et dossiers de l'explorateur
+    // Masque les fichiers et dossiers qui ne sont généralement pas modifiés directement
+    // ou qui ne font pas partie de votre travail quotidien dans wp-content.
+    "files.exclude": {
+        "**/.git": true,               // Dossier Git
+        "**/.svn": true,               // Dossier Subversion
+        "**/.hg": true,                // Dossier Mercurial
+        "**/CVS": true,                // Dossier CVS
+        "**/.DS_Store": true,          // Fichier macOS
+        "**/Thumbs.db": true,          // Fichier Windows
+        "node_modules/": true,         // Dépendances Node.js (si à la racine)
+        "vendor/": true,               // Dépendances Composer (si à la racine)
+
+        // Si jamais vous aviez une copie locale complète de WordPress et que vous vouliez
+        // masquer les répertoires du cœur (non applicable si vous n'avez que wp-content localement) :
+        // "wp-admin/": true,
+        // "wp-includes/": true,
+        // "*.php": true, // Attention : masquerait tous les .php à la racine
+        // "index.php": true,
+        // "license.txt": true,
+        // "readme.html": true,
+        // "wp-activate.php": true,
+        // "wp-blog-header.php": true,
+        // "wp-comments-post.php": true,
+        // "wp-config-sample.php": true,
+        // "wp-cron.php": true,
+        // "wp-links-opml.php": true,
+        // "wp-load.php": true,
+        // "wp-login.php": true,
+        // "wp-mail.php": true,
+        // "wp-settings.php": true,
+        // "wp-signup.php": true,
+        // "wp-trackback.php": true,
+        // "xmlrpc.php": true
+    },
+
+    // Section: Exclusion de l'observateur de fichiers
+    // Empêche VS Code de surveiller les modifications dans ces dossiers,
+    // ce qui peut améliorer les performances, surtout avec Docker.
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,    // Pour les node_modules dans les thèmes/plugins
+        "**/vendor/*/**": true,          // Pour les vendor dans les thèmes/plugins
+        "**/wp-content/uploads/**": true, // Les téléversements peuvent être nombreux
+        "**/wp-content/cache/**": true,   // Dossiers de cache
+        // Si vous aviez wp-admin et wp-includes localement :
+        // "**/wp-admin/**": true,
+        // "**/wp-includes/**": true
+    },
+
+    // Section: Configuration de PHP Intelephense
+    // Crucial pour la reconnaissance du code WordPress et éviter les fausses erreurs.
+    "intelephense.stubs": [
+        // Stubs PHP essentiels et couramment utilisés
+        "Core",
+        "standard", // Note: "standard" est dans votre liste, c'est un alias pour de nombreuses fonctions de base.
+        "apache",
+        "bcmath",
+        "ctype",
+        "curl",
+        "date",
+        "dom",
+        "exif",
+        "fileinfo",
+        "filter",
+        "gd",
+        "hash",
+        "iconv",
+        "json",
+        "libxml",
+        "mbstring",
+        "mysqli", // Important pour la connexion à la base de données WordPress
+        "openssl",
+        "pcre",
+        "PDO",      // Alternative pour la base de données, souvent utilisé
+        "Phar",     // Notez la majuscule 'P'
+        "Reflection",
+        "session",
+        "SimpleXML",
+        "sockets",
+        "SPL",
+        "sqlite3",  // Parfois utilisé
+        "tokenizer",
+        "xml",
+        "xmlreader",
+        "xmlrpc",   // Pertinent pour WordPress
+        "xmlwriter",
+        "zip",
+        "zlib",
+        // Le stub le plus important pour WordPress !
+        "wordpress"
+    ],
+    "intelephense.environment.phpVersion": "8.3",
+
+    // Section: Formatage PHP (optionnel, mais recommandé pour la cohérence)
+    // Ceci configure le formateur par défaut pour PHP et utilise les standards WordPress.
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client", // Utilise Intelephense pour le formatage
+        "editor.formatOnSave": true // Formate automatiquement à la sauvegarde
+    },
+  
+    // Section: Recherche
+    // Exclut certains dossiers des résultats de recherche pour les rendre plus pertinents.
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/vendor": true,
+        "**/wp-content/uploads": true,
+        "**/wp-content/cache": true,
+        // Si vous aviez wp-admin et wp-includes localement :
+        // "**/wp-admin": true,
+        // "**/wp-includes": true
+    }
+}
