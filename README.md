@@ -4,7 +4,7 @@ Ce projet est un kit de démarrage pour développer des sites WordPress en utili
 
 ## Fonctionnalités
 
-*   **Environnement Dockerisé** : Services WordPress, MySQL, et Redis gérés via `docker-compose`.
+*   **Environnement Dockerisé** : Services WordPress, MySQL, et Redis gérés via `docker compose`.
 *   **WordPress Préconfiguré** : Installation automatisée de WordPress au premier lancement.
 *   **Plugins de Base Inclus (préparation pour installation)** :
     *   Advanced Custom Fields
@@ -43,7 +43,7 @@ Ce projet est un kit de démarrage pour développer des sites WordPress en utili
 
 3.  **Lancer les conteneurs Docker** :
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
     Cette commande va construire les images (si nécessaire) et démarrer les services en arrière-plan.
 
@@ -54,7 +54,7 @@ Ce projet est un kit de démarrage pour développer des sites WordPress en utili
 
 ```
 .
-├── docker-compose.yml        # Configuration des services Docker
+├── docker compose.yml        # Configuration des services Docker
 ├── .env.example              # Fichier d'exemple pour les variables d'environnement
 ├── LICENSE                   # Licence du projet (si présente)
 ├── README.md                 # Ce fichier
@@ -91,7 +91,7 @@ Les variables d'environnement sont gérées dans le fichier `.env`. Consultez `.
 Pour exécuter des commandes à l'intérieur du conteneur WordPress (par exemple, WP-CLI ou Composer) :
 
 ```bash
-docker-compose exec wordpress bash
+docker compose exec wordpress bash
 ```
 
 ### WP-CLI
@@ -148,9 +148,9 @@ Le script `custom-entrypoint.sh` est conçu pour faciliter l'utilisation d'un th
 Le fichier `docker/Dockerfile--wordpress` peut être modifié pour ajouter des dépendances PHP supplémentaires, des outils système, ou changer la version de Node.js. N'oubliez pas de reconstruire l'image après modification :
 
 ```bash
-docker-compose build wordpress
+docker compose build wordpress
 # ou pour forcer la reconstruction et redémarrer :
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## Production
@@ -165,8 +165,8 @@ Pour un environnement de production :
 ## Dépannage
 
 *   **Problèmes de permission sur `wp-content`** : Assurez-vous que les permissions du dossier `wp-content` sur votre machine hôte permettent au conteneur Docker d'écrire dedans. L'utilisateur dans le conteneur est `www-data` (UID 33 ou 82 selon l'image de base WordPress).
-*   **MySQL ne démarre pas** : Vérifiez les logs du conteneur `db` avec `docker-compose logs db`.
-*   **WordPress ne s'installe pas ou boucle au démarrage** : Vérifiez les logs du conteneur `wordpress` avec `docker-compose logs wordpress`. Le script `custom-entrypoint.sh` affiche des messages utiles.
+*   **MySQL ne démarre pas** : Vérifiez les logs du conteneur `db` avec `docker compose logs db`.
+*   **WordPress ne s'installe pas ou boucle au démarrage** : Vérifiez les logs du conteneur `wordpress` avec `docker compose logs wordpress`. Le script `custom-entrypoint.sh` affiche des messages utiles.
 *   **Emails non envoyés** : Vérifiez la configuration `MSMTP_*` dans `.env` et les logs de msmtp dans le conteneur (`/tmp/msmtp.log` par défaut, ou le chemin défini dans `MSMTP_LOGFILE`). Testez la configuration msmtp manuellement depuis le conteneur si besoin.
 *   **Erreur "mysqladmin not found" dans les logs** : Le script `custom-entrypoint.sh` tente d'installer `default-mysql-client` si `mysqladmin` n'est pas trouvé. Si cela échoue, il peut y avoir un problème avec `apt-get update` ou la connectivité réseau à l'intérieur du conteneur au moment du build ou du premier démarrage.
 
