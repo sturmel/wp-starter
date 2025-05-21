@@ -126,28 +126,10 @@ echo "[CustomScript] Current environment: $CURRENT_ENV"
 # Add Redis configuration
 if [ -n "${WORDPRESS_REDIS_HOST:-}" ] && [ -n "${WORDPRESS_REDIS_PORT:-}" ]; then
     echo "[CustomScript] Configuring Redis object cache..."
-    wp config set WP_REDIS_HOST "${WORDPRESS_REDIS_HOST}" --raw --path="$WP_PATH" --allow-root --quiet
-    wp config set WP_REDIS_PORT "${WORDPRESS_REDIS_PORT}" --raw --path="$WP_PATH" --allow-root --quiet
-    if [ -n "${WORDPRESS_REDIS_PASSWORD:-}" ]; then
-        wp config set WP_REDIS_PASSWORD "${WORDPRESS_REDIS_PASSWORD}" --raw --path="$WP_PATH" --allow-root --quiet
-    fi
-    # Add other Redis settings if needed, e.g., database, prefix
-    # wp config set WP_REDIS_DATABASE <db_number> --raw --path="$WP_PATH" --allow-root --quiet
-    # wp config set WP_REDIS_PREFIX <prefix> --raw --path="$WP_PATH" --allow-root --quiet
-
-    # Install and activate Redis Object Cache plugin if not already active
-    if ! wp plugin is-installed redis-cache --path="$WP_PATH" --allow-root --quiet; then
-        echo "[CustomScript] Installing Redis Object Cache plugin..."
-        wp plugin install redis-cache --activate --path="$WP_PATH" --allow-root --quiet || echo "[CustomScript WARNING] Failed to install or activate Redis Object Cache plugin."
-    elif ! wp plugin is-active redis-cache --path="$WP_PATH" --allow-root --quiet; then
-        echo "[CustomScript] Activating Redis Object Cache plugin..."
-        wp plugin activate redis-cache --path="$WP_PATH" --allow-root --quiet || echo "[CustomScript WARNING] Failed to activate Redis Object Cache plugin."
-    else
-        echo "[CustomScript] Redis Object Cache plugin already installed and active."
-    fi
-    
-    # Enable Redis object cache
-    wp redis enable --path="$WP_PATH" --allow-root --quiet || echo "[CustomScript WARNING] Failed to enable Redis object cache. May need to be done manually."
+    wp config set WP_REDIS_HOST "${WORDPRESS_REDIS_HOST}" --path="$WP_PATH" --allow-root --quiet
+    wp config set WP_REDIS_PORT "${WORDPRESS_REDIS_PORT}" --path="$WP_PATH" --allow-root --quiet
+    wp plugin install redis-cache --activate --path="$WP_PATH" --allow-root --quiet
+    wp redis enable --path="$WP_PATH" --allow-root --quiet
     echo "[CustomScript] Redis object cache configured and enabled."
 fi
 
@@ -344,36 +326,30 @@ else
 fi
 
 
-ALL_CONFIG_ADDITIONS="" # Initialize with empty string
+ALL_CONFIG_ADDITIONS="" 
 
-# Check if WP_CACHE is already defined to avoid duplication
 if ! grep -q "define( *'WP_CACHE' *, *true *);" "$WP_CONFIG_FILE"; then
     ALL_CONFIG_ADDITIONS="define( 'WP_CACHE', true );"
 fi
 
 if [ "$CURRENT_ENV" = "production" ]; then
-    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\\ndefine( 'AUTOMATIC_UPDATER_DISABLED', true );\\ndefine( 'DISALLOW_FILE_MODS', true );"
-else
-
-    echo "[CustomScript] Development/other environment: Adding relevant constants to wp-config.php"
-    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\\ndefine( 'AUTOMATIC_UPDATER_DISABLED', false );\\ndefine( 'DISALLOW_FILE_MODS', false );"
+    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', true );\ndefine( 'DISALLOW_FILE_MODS', true );"
+elif [ "$CURRENT_ENV" = "development" ]; then # Added elif for clarity, assuming these are the only two states
+    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', false );\ndefine( 'DISALLOW_FILE_MODS', false );"
 fi
 
 
 if [ -f "$WP_CONFIG_FILE" ]; then
-    echo "[CustomScript] Configuring WP_CACHE and environment constants in $WP_CONFIG_FILE..."
 
-    sed -i "/WP_CACHE/d" "$WP_CONFIG_FILE"
-    sed -i "/AUTOMATIC_UPDATER_DISABLED/d" "$WP_CONFIG_FILE"
-    sed -i "/DISALLOW_FILE_MODS/d" "$WP_CONFIG_FILE"
+    echo "[CustomScript] Configuration constants will be applied to $WP_CONFIG_FILE."
 
-    if sed "/\\/\\* That's all, stop editing! Happy publishing. \\*\\//i ${ALL_CONFIG_ADDITIONS}" "$WP_CONFIG_FILE" > "${WP_CONFIG_FILE}.tmp" && mv "${WP_CONFIG_FILE}.tmp" "$WP_CONFIG_FILE"; then
-        echo "[CustomScript] WP_CACHE and environment constants configured in $WP_CONFIG_FILE."
-    else
-        echo "[CustomScript ERROR] Failed to write constants to $WP_CONFIG_FILE. A backup might be at ${WP_CONFIG_FILE}.tmp or manual check needed."
+    if [ -n "$ALL_CONFIG_ADDITIONS" ]; then
+      
+        if ! grep -q "define( *'AUTOMATIC_UPDATER_DISABLED'" "$WP_CONFIG_FILE"; then
+            echo -e "\n${ALL_CONFIG_ADDITIONS}" >> "$WP_CONFIG_FILE"
+            echo "[CustomScript] Added environment-specific constants to $WP_CONFIG_FILE."
+        fi
     fi
-else
-    echo "[CustomScript ERROR] $WP_CONFIG_FILE not found. Cannot set WP_CACHE or environment constants."
 fi
 
 
