@@ -197,11 +197,11 @@ if [ "$CURRENT_ENV" = "development" ]; then
             echo "[CustomScript] Creating style.css for ${CUSTOM_THEME_SLUG}..."
             cat << EOF_STYLE > "${CUSTOM_THEME_PATH}/style.css"
 /*
-Theme Name: ${CUSTOM_THEME_SLUG}
-Template: ${STARTER_THEME_SLUG}
-Description: Custom child theme of ${STARTER_THEME_SLUG}
-Version: 1.0
-Author: WP Starter
+ * Theme Name: ${CUSTOM_THEME_SLUG}
+ * Template: ${STARTER_THEME_SLUG}
+ * Description: Theme using Timber, ACF, and Tailwind CSS
+ * Author: Lugh Web
+ * Author URI: https://lugh-web.fr
 */
 EOF_STYLE
      
