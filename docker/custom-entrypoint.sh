@@ -177,14 +177,14 @@ if [ "$CURRENT_ENV" = "development" ]; then
 
             composer create-project upstatement/timber-starter-theme "${STARTER_THEME_SLUG}" --no-dev --prefer-dist
             echo "[CustomScript] Timber Starter Theme installed in ${STARTER_THEME_PATH}."
-            ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" # Run composer install after creation
+            ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" 
             cd "$OLDPWD"
         else
             echo "[CustomScript ERROR] Could not cd to ${THEMES_PATH}. Cannot install Timber Starter Theme."
         fi
     else
         echo "[CustomScript] Timber Starter Theme already exists at ${STARTER_THEME_PATH}."
-        ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" # Check on restart
+        ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" 
     fi
 
 
@@ -194,7 +194,6 @@ if [ "$CURRENT_ENV" = "development" ]; then
             echo "[CustomScript] Creating child theme ${CUSTOM_THEME_SLUG} for parent ${STARTER_THEME_SLUG}..."
             mkdir -p "${CUSTOM_THEME_PATH}"
 
-            # Create style.css for the child theme
             echo "[CustomScript] Creating style.css for ${CUSTOM_THEME_SLUG}..."
             cat << EOF_STYLE > "${CUSTOM_THEME_PATH}/style.css"
 /*
@@ -209,8 +208,8 @@ EOF_STYLE
             echo "[CustomScript] Creating functions.php for ${CUSTOM_THEME_SLUG}..."
             cat << 'EOF_FUNCTIONS' > "${CUSTOM_THEME_PATH}/functions.php"
 <?php
-add_action('wp_enqueue_scripts', 'my_child_theme_enqueue_styles_scripts');
-function my_child_theme_enqueue_styles_scripts()
+add_action('wp_enqueue_scripts', 'theme_enqueue_styles_scripts');
+function theme_enqueue_styles_scripts()
 {
     wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
     wp_enqueue_style(
@@ -239,8 +238,6 @@ function my_child_theme_enqueue_styles_scripts()
         );
     }
 }
-
-add_filter('use_block_editor_for_post_type', '__return_false', 100);
 
 function hide_editor()
 {
@@ -278,8 +275,6 @@ add_action('wp_enqueue_scripts', function () {
     wp_dequeue_style('global-styles');
     wp_dequeue_style('classic-theme-styles');
 }, 20);
-
-?>
 EOF_FUNCTIONS
             echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
 
@@ -475,7 +470,7 @@ fi
 
 if [ "$CURRENT_ENV" = "production" ]; then
     ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', true );\ndefine( 'DISALLOW_FILE_MODS', true );"
-elif [ "$CURRENT_ENV" = "development" ]; then # Added elif for clarity, assuming these are the only two states
+elif [ "$CURRENT_ENV" = "development" ]; then 
     ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', false );\ndefine( 'DISALLOW_FILE_MODS', false );"
 fi
 
