@@ -209,39 +209,76 @@ EOF_STYLE
             echo "[CustomScript] Creating functions.php for ${CUSTOM_THEME_SLUG}..."
             cat << 'EOF_FUNCTIONS' > "${CUSTOM_THEME_PATH}/functions.php"
 <?php
-add_action( 'wp_enqueue_scripts', 'my_child_theme_enqueue_styles_scripts' );
-function my_child_theme_enqueue_styles_scripts() {
-    // Enqueue parent theme stylesheet
-    wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
-
-    // Enqueue child theme's main stylesheet (style.css)
-    wp_enqueue_style( 'child-style',
+add_action('wp_enqueue_scripts', 'my_child_theme_enqueue_styles_scripts');
+function my_child_theme_enqueue_styles_scripts()
+{
+    wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
+    wp_enqueue_style(
+        'child-style',
         get_stylesheet_directory_uri() . '/style.css',
-        array( 'parent-style' ),
+        array('parent-style'),
         wp_get_theme()->get('Version')
     );
-
-    // Enqueue Tailwind CSS output file (if it exists)
     $tailwind_css_path = get_stylesheet_directory() . '/assets/css/tailwind.css';
     if (file_exists($tailwind_css_path)) {
-        wp_enqueue_style( 'tailwind-style',
+        wp_enqueue_style(
+            'tailwind-style',
             get_stylesheet_directory_uri() . '/assets/css/tailwind.css',
-            array( 'child-style' ), // Depends on child-style or parent-style
-            filemtime($tailwind_css_path) // Versioning based on file modification time
+            array('child-style'),
+            filemtime($tailwind_css_path)
         );
     }
-
-    // Enqueue child theme's JavaScript file (if it exists)
     $child_js_path = get_stylesheet_directory() . '/assets/js/scripts.min.js';
     if (file_exists($child_js_path)) {
-        wp_enqueue_script( 'child-scripts',
-            get_stylesheet_directory_uri() . '/assets/js/scripts.min.js', // Using minified version
-            array(), // Dependencies, e.g., 'jquery'
-            filemtime($child_js_path), // Versioning
-            true // Load in footer
+        wp_enqueue_script(
+            'child-scripts',
+            get_stylesheet_directory_uri() . '/assets/js/scripts.min.js',
+            array(),
+            filemtime($child_js_path),
+            true
         );
     }
 }
+
+add_filter('use_block_editor_for_post_type', '__return_false', 100);
+
+function hide_editor()
+{
+    if (!is_admin()) {
+        return;
+    }
+    $screen = get_current_screen();
+    if ($screen && $screen->id === 'page') {
+        $postId = $_GET['post'] ?? $_POST['post_ID'] ?? null;
+        if ($postId) {
+            $templateFile = get_post_meta($postId, '_wp_page_template', true);
+            $targetTemplates = array();
+            if (in_array($templateFile, $targetTemplates)) {
+                remove_post_type_support('page', 'editor');
+            }
+        }
+    }
+}
+add_action('load-page.php', 'hide_editor');
+
+function custom_navigation()
+{
+    register_nav_menu('main_menu', __('Menu principal'));
+    register_nav_menu('footer_menu_legal', __('Menu footer Legal'));
+    register_nav_menu('footer_menu_social', __('Menu footer Social'));
+}
+add_action('init', 'custom_navigation');
+
+add_filter('use_block_editor_for_post', '__return_false');
+add_filter('use_widgets_block_editor', '__return_false');
+
+add_action('wp_enqueue_scripts', function () {
+    wp_dequeue_style('wp-block-library');
+    wp_dequeue_style('wp-block-library-theme');
+    wp_dequeue_style('global-styles');
+    wp_dequeue_style('classic-theme-styles');
+}, 20);
+
 ?>
 EOF_FUNCTIONS
             echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
@@ -455,7 +492,6 @@ if [ -f "$WP_CONFIG_FILE" ]; then
         fi
     fi
 fi
-
 
 echo "[CustomScript] Custom theme and plugin installation tasks complete."
 
