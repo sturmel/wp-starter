@@ -279,15 +279,13 @@ add_action('wp_enqueue_scripts', function () {
 EOF_FUNCTIONS
             echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
 
-     
-            if [ -f "${STARTER_THEME_PATH}/composer.json" ]; then
-                echo "[CustomScript] Copying composer.json from ${STARTER_THEME_SLUG} to ${CUSTOM_THEME_SLUG}..."
-                cp "${STARTER_THEME_PATH}/composer.json" "${CUSTOM_THEME_PATH}/composer.json"
-                ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
-            else
-                echo "[CustomScript WARNING] composer.json not found in ${STARTER_THEME_PATH}. Skipping composer install for child theme."
-            fi
-
+             echo "[CustomScript] Creating .gitignore for ${CUSTOM_THEME_SLUG}..."
+            cat << EOF_GITIGNORE > "${CUSTOM_THEME_PATH}/.gitignore"
+node_modules/
+package-lock.json
+vendor/
+composer.lock
+EOF_GITIGNORE
     
             echo "[CustomScript] Setting up Node.js environment, Tailwind CSS, and Terser in ${CUSTOM_THEME_PATH}..."
             ( 
@@ -300,9 +298,8 @@ EOF_FUNCTIONS
                 npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer terser
 
                 echo "[CustomScript] Configuring package.json scripts for Tailwind v4..."
-                npm pkg set scripts.dev="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
-                npm pkg set scripts.build="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --minify && npx terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
-
+                npm pkg set scripts.dev="npx @tailwindcss/cli -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
+                npm pkg set scripts.build="npx @tailwindcss/cli -i ./tailwind-input.css -o ./assets/css/tailwind.css --minify && npx terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
 
                 echo "[CustomScript] Creating Tailwind input CSS file (tailwind-input.css) for v4..."
                 mkdir -p ./assets/css
