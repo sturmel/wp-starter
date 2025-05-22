@@ -168,8 +168,6 @@ ensure_composer_install() {
 
 ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
 
-ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
-
 if [ "$CURRENT_ENV" = "development" ]; then
     echo "[CustomScript] In development mode, ensuring Timber starter theme is present and custom theme is installed and active."
 
@@ -191,29 +189,151 @@ if [ "$CURRENT_ENV" = "development" ]; then
     fi
 
 
+    # Create custom theme as a child of timber-starter-theme
     if [ ! -d "${CUSTOM_THEME_PATH}" ]; then
-        echo "[CustomScript] Custom theme ${CUSTOM_THEME_SLUG} not found at ${CUSTOM_THEME_PATH}."
+        echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} not found at ${CUSTOM_THEME_PATH}."
         if [ -d "${STARTER_THEME_PATH}" ]; then
-            echo "[CustomScript] Copying ${STARTER_THEME_SLUG} to ${CUSTOM_THEME_SLUG}..."
-            cp -r "${STARTER_THEME_PATH}" "${CUSTOM_THEME_PATH}"
+            echo "[CustomScript] Creating child theme ${CUSTOM_THEME_SLUG} for parent ${STARTER_THEME_SLUG}..."
+            mkdir -p "${CUSTOM_THEME_PATH}"
 
-            if [ -f "${CUSTOM_THEME_PATH}/style.css" ]; then
-                sed -i "s/Theme Name: Timber Starter Theme/Theme Name: ${CUSTOM_THEME_SLUG}/g" "${CUSTOM_THEME_PATH}/style.css"
+            # Create style.css for the child theme
+            echo "[CustomScript] Creating style.css for ${CUSTOM_THEME_SLUG}..."
+            cat << EOF_STYLE > "${CUSTOM_THEME_PATH}/style.css"
+/*
+Theme Name: ${CUSTOM_THEME_SLUG}
+Template: ${STARTER_THEME_SLUG}
+Description: Custom child theme of ${STARTER_THEME_SLUG}
+Version: 1.0
+Author: WP Starter
+*/
+EOF_STYLE
+            # Create functions.php for the child theme
+            echo "[CustomScript] Creating functions.php for ${CUSTOM_THEME_SLUG}..."
+            cat << 'EOF_FUNCTIONS' > "${CUSTOM_THEME_PATH}/functions.php"
+<?php
+add_action( 'wp_enqueue_scripts', 'my_child_theme_enqueue_styles_scripts' );
+function my_child_theme_enqueue_styles_scripts() {
+    // Enqueue parent theme stylesheet
+    wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
 
-                sed -i "s/Text Domain: timber-starter-theme/Text Domain: ${CUSTOM_THEME_SLUG}/g" "${CUSTOM_THEME_PATH}/style.css"
-                echo "[CustomScript] Updated style.css for ${CUSTOM_THEME_SLUG}."
+    // Enqueue child theme's main stylesheet (style.css)
+    wp_enqueue_style( 'child-style',
+        get_stylesheet_directory_uri() . '/style.css',
+        array( 'parent-style' ),
+        wp_get_theme()->get('Version')
+    );
+
+    // Enqueue Tailwind CSS output file (if it exists)
+    $tailwind_css_path = get_stylesheet_directory() . '/assets/css/tailwind.css';
+    if (file_exists($tailwind_css_path)) {
+        wp_enqueue_style( 'tailwind-style',
+            get_stylesheet_directory_uri() . '/assets/css/tailwind.css',
+            array( 'child-style' ), // Depends on child-style or parent-style
+            filemtime($tailwind_css_path) // Versioning based on file modification time
+        );
+    }
+
+    // Enqueue child theme's JavaScript file (if it exists)
+    $child_js_path = get_stylesheet_directory() . '/assets/js/scripts.min.js';
+    if (file_exists($child_js_path)) {
+        wp_enqueue_script( 'child-scripts',
+            get_stylesheet_directory_uri() . '/assets/js/scripts.min.js', // Using minified version
+            array(), // Dependencies, e.g., 'jquery'
+            filemtime($child_js_path), // Versioning
+            true // Load in footer
+        );
+    }
+}
+?>
+EOF_FUNCTIONS
+            echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
+
+            # --- Composer Setup for Child Theme ---
+            if [ -f "${STARTER_THEME_PATH}/composer.json" ]; then
+                echo "[CustomScript] Copying composer.json from ${STARTER_THEME_SLUG} to ${CUSTOM_THEME_SLUG}..."
+                cp "${STARTER_THEME_PATH}/composer.json" "${CUSTOM_THEME_PATH}/composer.json"
+                ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
+            else
+                echo "[CustomScript WARNING] composer.json not found in ${STARTER_THEME_PATH}. Skipping composer install for child theme."
             fi
-            echo "[CustomScript] Custom theme ${CUSTOM_THEME_SLUG} created from ${STARTER_THEME_SLUG}."
-            ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
+
+            # --- Node.js, Tailwind CSS, and Terser Setup for Child Theme ---
+            echo "[CustomScript] Setting up Node.js environment, Tailwind CSS, and Terser in ${CUSTOM_THEME_PATH}..."
+            ( # Subshell to handle cd and prevent directory changes from affecting the rest of the script
+                cd "${CUSTOM_THEME_PATH}" || { echo "[CustomScript ERROR] Failed to cd into ${CUSTOM_THEME_PATH}"; exit 1; }
+
+                echo "[CustomScript] Initializing npm package (package.json)..."
+                npm init -y --scope "${CUSTOM_THEME_SLUG}" > /dev/null 2>&1 # Suppress output, use theme slug for package name
+
+                echo "[CustomScript] Installing Tailwind CSS, its plugins, PostCSS, Autoprefixer, and Terser as dev dependencies..."
+                npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer terser
+
+                echo "[CustomScript] Configuring package.json scripts for Tailwind v4..."
+                npm pkg set scripts.test="echo \\\"Error: no test specified\\\" && exit 1"
+                npm pkg set scripts.dev="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
+                npm pkg set scripts.build="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --minify && npx terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
+
+                # echo "[CustomScript] Creating Tailwind CSS configuration (tailwind.config.js)..." # Removed for Tailwind v4
+                # cat << 'EOF_TAILWIND_CONFIG' > ./tailwind.config.js # Removed for Tailwind v4
+                # ...config content removed...
+                # 'EOF_TAILWIND_CONFIG' # Removed for Tailwind v4
+
+                echo "[CustomScript] Creating Tailwind input CSS file (tailwind-input.css) for v4..."
+                mkdir -p ./assets/css
+                cat << 'EOF_TAILWIND_INPUT_CSS_V4' > ./tailwind-input.css
+/* Explicitly define content paths here for Tailwind v4 */
+@content './views/**/*.twig';
+@content './*.php';
+@content './assets/js/**/*.js';
+@content './tailwind-input.css'; /* Include itself if it contains classes or is used for @theme */
+
+/* Import Tailwind's base, components, and utilities for v4 */
+@import "tailwindcss";
+
+/* Custom base styles */
+@layer base {
+
+}
+
+/* Custom component styles */
+@layer components {
+
+}
+
+@layer utilities {
+
+}
+
+/* Custom theme variables for Tailwind v4 */
+@theme {
+
+}
+EOF_TAILWIND_INPUT_CSS_V4
+
+                echo "[CustomScript] Creating JavaScript directory and initial script file (assets/js/scripts.js)..."
+                mkdir -p ./assets/js
+                touch ./assets/js/scripts.js # Create an empty main JS file
+
+                echo "[CustomScript] Running initial build for Tailwind CSS and JS..."
+                if npm run build; then
+                    echo "[CustomScript] Initial build successful for ${CUSTOM_THEME_SLUG}."
+                else
+                    echo "[CustomScript WARNING] Initial build failed for ${CUSTOM_THEME_SLUG}. Please check for errors in ${CUSTOM_THEME_PATH}."
+                fi
+            ) # End subshell
+            echo "[CustomScript] Node.js, Tailwind CSS, and Terser setup complete for ${CUSTOM_THEME_SLUG}."
+            # The ensure_composer_install for the child theme (if composer.json was copied) is handled above.
         else
-            echo "[CustomScript ERROR] Cannot create custom theme as ${STARTER_THEME_SLUG} does not exist."
+            echo "[CustomScript ERROR] Cannot create child theme as parent theme ${STARTER_THEME_SLUG} does not exist at ${STARTER_THEME_PATH}."
         fi
     else
         echo "[CustomScript] Custom theme ${CUSTOM_THEME_SLUG} already exists at ${CUSTOM_THEME_PATH}."
-        ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}" 
+        # If it exists, ensure its composer dependencies (if any) are installed.
+        # This might be relevant if the child theme evolves to have its own composer.json.
+        ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
     fi
 
-
+    # Activate the custom theme
     if [ -d "${CUSTOM_THEME_PATH}" ]; then
         CUSTOM_THEME_STATUS=$(wp theme status "${CUSTOM_THEME_SLUG}" --path="${WP_PATH}" --allow-root --field=status 2>/dev/null || echo "not-installed")
         if [ "$CUSTOM_THEME_STATUS" != "active" ]; then
@@ -229,11 +349,10 @@ if [ "$CURRENT_ENV" = "development" ]; then
     else
         echo "[CustomScript WARNING] Custom theme ${CUSTOM_THEME_SLUG} not found. Cannot activate."
     fi
-
-else 
+else  # For production environment theme logic
     echo "[CustomScript] In production mode. Ensuring custom theme is active if it exists, otherwise Timber starter, otherwise default."
     ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
-    ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}" 
+    ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
 
     ACTIVE_THEME=$(wp theme list --status=active --field=name --path="${WP_PATH}" --allow-root 2>/dev/null || echo "")
     if [ -z "$ACTIVE_THEME" ] || [ "$ACTIVE_THEME" != "$CUSTOM_THEME_SLUG" ]; then
@@ -286,7 +405,7 @@ else
     else
         echo "[CustomScript] Active theme in production: $ACTIVE_THEME."
     fi
-fi
+fi # Correctly closes the main if/else for theme environment logic
 
 
 PLUGINS_TO_INSTALL=(
@@ -309,7 +428,7 @@ if [ "$CURRENT_ENV" = "development" ]; then
         echo "[CustomScript] Plugin $plugin_slug is already installed and active."
       fi
     done
-else 
+else
     echo "[CustomScript] In production mode, ensuring plugins are active if already installed."
     for plugin_slug in "${PLUGINS_TO_INSTALL[@]}"; do
         if wp plugin is-installed "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
