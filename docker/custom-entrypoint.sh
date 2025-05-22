@@ -123,7 +123,6 @@ echo "[CustomScript] ${MSMTP_CONFIG_FILE} configured from environment variables.
 CURRENT_ENV="${WORDPRESS_ENV:-development}"
 echo "[CustomScript] Current environment: $CURRENT_ENV"
 
-# Add Redis configuration
 if [ -n "${WORDPRESS_REDIS_HOST:-}" ] && [ -n "${WORDPRESS_REDIS_PORT:-}" ]; then
     echo "[CustomScript] Configuring Redis object cache..."
     wp config set WP_REDIS_HOST "${WORDPRESS_REDIS_HOST}" --path="$WP_PATH" --allow-root --quiet
@@ -189,7 +188,6 @@ if [ "$CURRENT_ENV" = "development" ]; then
     fi
 
 
-    # Create custom theme as a child of timber-starter-theme
     if [ ! -d "${CUSTOM_THEME_PATH}" ]; then
         echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} not found at ${CUSTOM_THEME_PATH}."
         if [ -d "${STARTER_THEME_PATH}" ]; then
@@ -207,7 +205,7 @@ Version: 1.0
 Author: WP Starter
 */
 EOF_STYLE
-            # Create functions.php for the child theme
+     
             echo "[CustomScript] Creating functions.php for ${CUSTOM_THEME_SLUG}..."
             cat << 'EOF_FUNCTIONS' > "${CUSTOM_THEME_PATH}/functions.php"
 <?php
@@ -248,7 +246,7 @@ function my_child_theme_enqueue_styles_scripts() {
 EOF_FUNCTIONS
             echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
 
-            # --- Composer Setup for Child Theme ---
+     
             if [ -f "${STARTER_THEME_PATH}/composer.json" ]; then
                 echo "[CustomScript] Copying composer.json from ${STARTER_THEME_SLUG} to ${CUSTOM_THEME_SLUG}..."
                 cp "${STARTER_THEME_PATH}/composer.json" "${CUSTOM_THEME_PATH}/composer.json"
@@ -257,26 +255,21 @@ EOF_FUNCTIONS
                 echo "[CustomScript WARNING] composer.json not found in ${STARTER_THEME_PATH}. Skipping composer install for child theme."
             fi
 
-            # --- Node.js, Tailwind CSS, and Terser Setup for Child Theme ---
+    
             echo "[CustomScript] Setting up Node.js environment, Tailwind CSS, and Terser in ${CUSTOM_THEME_PATH}..."
-            ( # Subshell to handle cd and prevent directory changes from affecting the rest of the script
+            ( 
                 cd "${CUSTOM_THEME_PATH}" || { echo "[CustomScript ERROR] Failed to cd into ${CUSTOM_THEME_PATH}"; exit 1; }
 
                 echo "[CustomScript] Initializing npm package (package.json)..."
-                npm init -y --scope "${CUSTOM_THEME_SLUG}" > /dev/null 2>&1 # Suppress output, use theme slug for package name
+                npm init -y --scope "${CUSTOM_THEME_SLUG}" > /dev/null 2>&1 
 
                 echo "[CustomScript] Installing Tailwind CSS, its plugins, PostCSS, Autoprefixer, and Terser as dev dependencies..."
                 npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer terser
 
                 echo "[CustomScript] Configuring package.json scripts for Tailwind v4..."
-                npm pkg set scripts.test="echo \\\"Error: no test specified\\\" && exit 1"
                 npm pkg set scripts.dev="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
                 npm pkg set scripts.build="npx tailwindcss -i ./tailwind-input.css -o ./assets/css/tailwind.css --minify && npx terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
 
-                # echo "[CustomScript] Creating Tailwind CSS configuration (tailwind.config.js)..." # Removed for Tailwind v4
-                # cat << 'EOF_TAILWIND_CONFIG' > ./tailwind.config.js # Removed for Tailwind v4
-                # ...config content removed...
-                # 'EOF_TAILWIND_CONFIG' # Removed for Tailwind v4
 
                 echo "[CustomScript] Creating Tailwind input CSS file (tailwind-input.css) for v4..."
                 mkdir -p ./assets/css
@@ -312,28 +305,20 @@ EOF_TAILWIND_INPUT_CSS_V4
 
                 echo "[CustomScript] Creating JavaScript directory and initial script file (assets/js/scripts.js)..."
                 mkdir -p ./assets/js
-                touch ./assets/js/scripts.js # Create an empty main JS file
-
-                echo "[CustomScript] Running initial build for Tailwind CSS and JS..."
-                if npm run build; then
-                    echo "[CustomScript] Initial build successful for ${CUSTOM_THEME_SLUG}."
-                else
-                    echo "[CustomScript WARNING] Initial build failed for ${CUSTOM_THEME_SLUG}. Please check for errors in ${CUSTOM_THEME_PATH}."
-                fi
-            ) # End subshell
+                touch ./assets/js/scripts.js 
+            ) 
             echo "[CustomScript] Node.js, Tailwind CSS, and Terser setup complete for ${CUSTOM_THEME_SLUG}."
-            # The ensure_composer_install for the child theme (if composer.json was copied) is handled above.
+
         else
             echo "[CustomScript ERROR] Cannot create child theme as parent theme ${STARTER_THEME_SLUG} does not exist at ${STARTER_THEME_PATH}."
         fi
     else
         echo "[CustomScript] Custom theme ${CUSTOM_THEME_SLUG} already exists at ${CUSTOM_THEME_PATH}."
-        # If it exists, ensure its composer dependencies (if any) are installed.
-        # This might be relevant if the child theme evolves to have its own composer.json.
+
         ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
     fi
 
-    # Activate the custom theme
+
     if [ -d "${CUSTOM_THEME_PATH}" ]; then
         CUSTOM_THEME_STATUS=$(wp theme status "${CUSTOM_THEME_SLUG}" --path="${WP_PATH}" --allow-root --field=status 2>/dev/null || echo "not-installed")
         if [ "$CUSTOM_THEME_STATUS" != "active" ]; then
@@ -349,7 +334,7 @@ EOF_TAILWIND_INPUT_CSS_V4
     else
         echo "[CustomScript WARNING] Custom theme ${CUSTOM_THEME_SLUG} not found. Cannot activate."
     fi
-else  # For production environment theme logic
+else  
     echo "[CustomScript] In production mode. Ensuring custom theme is active if it exists, otherwise Timber starter, otherwise default."
     ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
     ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
@@ -405,7 +390,7 @@ else  # For production environment theme logic
     else
         echo "[CustomScript] Active theme in production: $ACTIVE_THEME."
     fi
-fi # Correctly closes the main if/else for theme environment logic
+fi 
 
 
 PLUGINS_TO_INSTALL=(
