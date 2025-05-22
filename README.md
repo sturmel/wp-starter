@@ -283,3 +283,5 @@ Les suggestions et contributions sont les bienvenues. Veuillez ouvrir une issue 
 ## Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+Le concept de base de ce starter WordPress a été initialement développé par Lugh Web (https://lugh-web.fr).
