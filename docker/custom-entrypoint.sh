@@ -199,7 +199,8 @@ if [ "$CURRENT_ENV" = "development" ]; then
 /*
  * Theme Name: ${CUSTOM_THEME_SLUG}
  * Template: ${STARTER_THEME_SLUG}
- * Description: Theme using Timber, ACF, and Tailwind CSS
+ * Description: Child theme built upon the Timber starter theme, leveraging the Twig templating engine for enhanced separation of concerns and cleaner code. It integrates Advanced Custom Fields (ACF) for flexible content management and utilizes Tailwind CSS for a utility-first styling approach. The development workflow is powered by npm for frontend package management and Composer for PHP dependencies, allowing for easy extension with additional libraries. It also includes Terser for JavaScript minification, ensuring optimized performance and maintainability. This setup promotes a modern, efficient, and scalable WordPress development experience.
+ * Version: 1.0
  * Author: Lugh Web
  * Author URI: https://lugh-web.fr
 */
