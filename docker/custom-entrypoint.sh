@@ -8,13 +8,10 @@ PLUGINS_PATH=${WP_CONTENT_PATH}/plugins
 TIMBER_THEME_DIR_NAME="timber"
 TIMBER_REPO_URL="https://github.com/timber/timber.git"
 
-
-if ! command -v mysqladmin &> /dev/null
-then
+if ! command -v mysqladmin &>/dev/null; then
     echo "mysqladmin could not be found. Installing mysql-client..."
     apt-get update && apt-get install -y default-mysql-client
-    if ! command -v mysqladmin &> /dev/null
-    then
+    if ! command -v mysqladmin &>/dev/null; then
         echo "Failed to install mysql-client. Please install it manually in the Docker image."
         exit 1
     fi
@@ -27,7 +24,6 @@ until mysqladmin ping -h"db" -u"${WORDPRESS_DB_USER}" -p"${WORDPRESS_DB_PASSWORD
     sleep 5
 done
 echo "MySQL is up - continuing..."
-
 
 WP_CONFIG_FILE="${WP_PATH}/wp-config.php"
 
@@ -55,34 +51,34 @@ if [ ! -e "$WP_CONFIG_FILE" ]; then
         exit 1
     fi
 
-    sed -i -e "s/database_name_here/${WORDPRESS_DB_NAME}/g" \
-        -e "s/username_here/${WORDPRESS_DB_USER}/g" \
-        -e "s/password_here/${WORDPRESS_DB_PASSWORD}/g" \
-        -e "s/localhost/${WORDPRESS_DB_HOST}/g" \
-        "$WP_CONFIG_FILE"
+    sed -i -e "s/database_name_here/${WORDPRESS_DB_NAME}/g"
+    -e "s/username_here/${WORDPRESS_DB_USER}/g"
+    -e "s/password_here/${WORDPRESS_DB_PASSWORD}/g"
+    -e "s/localhost/${WORDPRESS_DB_HOST}/g"
+    "$WP_CONFIG_FILE"
 
     if [ -n "${WORDPRESS_TABLE_PREFIX:-}" ]; then
-        sed -i -e "s/\\$table_prefix = \'wp_\';/\\$table_prefix = \'$WORDPRESS_TABLE_PREFIX\';/g" "$WP_CONFIG_FILE"
+        sed -i -e "s/\$table_prefix = 'wp_';/\$table_prefix = '$WORDPRESS_TABLE_PREFIX';/g" "$WP_CONFIG_FILE"
     fi
     echo "[CustomScript] $WP_CONFIG_FILE created. Salts will be configured after core install."
 fi
 
 if ! wp core is-installed --path="$WP_PATH" --allow-root --quiet; then
     echo "[CustomScript] WordPress core is not installed. Installing..."
-    if [ -z "${WORDPRESS_URL:-}" ] || [ -z "${WORDPRESS_TITLE:-}" ] || \
-       [ -z "${WORDPRESS_ADMIN_USER:-}" ] || [ -z "${WORDPRESS_ADMIN_PASSWORD:-}" ] || \
-       [ -z "${WORDPRESS_ADMIN_EMAIL:-}" ]; then
+    if [ -z "${WORDPRESS_URL:-}" ] || [ -z "${WORDPRESS_TITLE:-}" ] ||
+        [ -z "${WORDPRESS_ADMIN_USER:-}" ] || [ -z "${WORDPRESS_ADMIN_PASSWORD:-}" ] ||
+        [ -z "${WORDPRESS_ADMIN_EMAIL:-}" ]; then
         echo "[CustomScript ERROR] Missing required environment variables for WordPress installation."
         exit 1
     fi
 
-    wp core install --url="$WORDPRESS_URL" \
-                    --title="$WORDPRESS_TITLE" \
-                    --admin_user="$WORDPRESS_ADMIN_USER" \
-                    --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
-                    --admin_email="$WORDPRESS_ADMIN_EMAIL" \
-                    --skip-email \
-                    --path="$WP_PATH" --allow-root
+    wp core install --url="$WORDPRESS_URL"
+    --title="$WORDPRESS_TITLE"
+    --admin_user="$WORDPRESS_ADMIN_USER"
+    --admin_password="$WORDPRESS_ADMIN_PASSWORD"
+    --admin_email="$WORDPRESS_ADMIN_EMAIL"
+    --skip-email
+    --path="$WP_PATH" --allow-root
     echo "[CustomScript] WordPress core installed."
 
     echo "[CustomScript] Configuring salts in $WP_CONFIG_FILE..."
@@ -96,27 +92,27 @@ echo "[CustomScript] Proceeding with Composer, Timber theme, and plugin installa
 MSMTP_CONFIG_FILE="/etc/msmtprc"
 echo "[CustomScript] Configuring msmtp..."
 
-MSMTP_CONTENT="defaults\\n"
-MSMTP_CONTENT+="auth ${MSMTP_AUTH:-on}\\n"
-MSMTP_CONTENT+="tls ${MSMTP_TLS:-off}\\n"
-MSMTP_CONTENT+="tls_starttls ${MSMTP_TLS_STARTTLS:-on}\\n"
-MSMTP_CONTENT+="tls_trust_file /etc/ssl/certs/ca-certificates.crt\\n"
+MSMTP_CONTENT="defaults\n"
+MSMTP_CONTENT ="auth ${MSMTP_AUTH:-on}\n"
+MSMTP_CONTENT ="tls ${MSMTP_TLS:-off}\n"
+MSMTP_CONTENT ="tls_starttls ${MSMTP_TLS_STARTTLS:-on}\n"
+MSMTP_CONTENT ="tls_trust_file /etc/ssl/certs/ca-certificates.crt\n"
 if [ -n "${MSMTP_LOGFILE:-}" ]; then
-    MSMTP_CONTENT+="logfile ${MSMTP_LOGFILE}\\n" 
+    MSMTP_CONTENT ="logfile ${MSMTP_LOGFILE}\n"
 else
-    MSMTP_CONTENT+="logfile /dev/null\\n" 
+    MSMTP_CONTENT ="logfile /dev/null\n"
 fi
-MSMTP_CONTENT+="\\naccount default\\n"
-MSMTP_CONTENT+="host ${MSMTP_HOST}\\n"
-MSMTP_CONTENT+="port ${MSMTP_PORT}\\n"
-MSMTP_CONTENT+="from ${MSMTP_FROM}\\n"
+MSMTP_CONTENT ="\naccount default\n"
+MSMTP_CONTENT ="host ${MSMTP_HOST}\n"
+MSMTP_CONTENT ="port ${MSMTP_PORT}\n"
+MSMTP_CONTENT ="from ${MSMTP_FROM}\n"
 
 if [ "${MSMTP_AUTH:-on}" = "on" ] && [ -n "${MSMTP_USER:-}" ]; then
-    MSMTP_CONTENT+="user ${MSMTP_USER}\\n"
-    MSMTP_CONTENT+="password ${MSMTP_PASSWORD}\\n"
+    MSMTP_CONTENT ="user ${MSMTP_USER}\n"
+    MSMTP_CONTENT ="password ${MSMTP_PASSWORD}\n"
 fi
 
-echo -e "${MSMTP_CONTENT}" > "${MSMTP_CONFIG_FILE}"
+echo -e "${MSMTP_CONTENT}" >"${MSMTP_CONFIG_FILE}"
 chmod 644 "${MSMTP_CONFIG_FILE}"
 echo "[CustomScript] ${MSMTP_CONFIG_FILE} configured from environment variables."
 
@@ -132,7 +128,6 @@ if [ -n "${WORDPRESS_REDIS_HOST:-}" ] && [ -n "${WORDPRESS_REDIS_PORT:-}" ]; the
     echo "[CustomScript] Redis object cache configured and enabled."
 fi
 
-
 CUSTOM_THEME_SLUG="${CUSTOM_THEME_NAME:-custom-timber-theme}"
 echo "[CustomScript] Custom theme name: $CUSTOM_THEME_SLUG"
 
@@ -147,7 +142,7 @@ ensure_composer_install() {
         if [ ! -d "${theme_path}/vendor" ]; then
             echo "[CustomScript] Vendor directory not found in ${theme_name} at ${theme_path}. Running composer install..."
             if [ -f "${theme_path}/composer.json" ]; then
-                if command -v composer &> /dev/null; then
+                if command -v composer &>/dev/null; then
                     (cd "${theme_path}" && composer install --no-dev --prefer-dist)
                     echo "[CustomScript] Composer install completed for ${theme_name}."
                 else
@@ -164,7 +159,6 @@ ensure_composer_install() {
     fi
 }
 
-
 ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
 
 if [ "$CURRENT_ENV" = "development" ]; then
@@ -177,16 +171,15 @@ if [ "$CURRENT_ENV" = "development" ]; then
 
             composer create-project upstatement/timber-starter-theme "${STARTER_THEME_SLUG}" --no-dev --prefer-dist
             echo "[CustomScript] Timber Starter Theme installed in ${STARTER_THEME_PATH}."
-            ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" 
+            ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
             cd "$OLDPWD"
         else
             echo "[CustomScript ERROR] Could not cd to ${THEMES_PATH}. Cannot install Timber Starter Theme."
         fi
     else
         echo "[CustomScript] Timber Starter Theme already exists at ${STARTER_THEME_PATH}."
-        ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}" 
+        ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
     fi
-
 
     if [ ! -d "${CUSTOM_THEME_PATH}" ]; then
         echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} not found at ${CUSTOM_THEME_PATH}."
@@ -195,7 +188,7 @@ if [ "$CURRENT_ENV" = "development" ]; then
             mkdir -p "${CUSTOM_THEME_PATH}"
 
             echo "[CustomScript] Creating style.css for ${CUSTOM_THEME_SLUG}..."
-            cat << EOF_STYLE > "${CUSTOM_THEME_PATH}/style.css"
+            cat <<EOF_STYLE >"${CUSTOM_THEME_PATH}/style.css"
 /*
  * Theme Name: ${CUSTOM_THEME_SLUG}
  * Template: ${STARTER_THEME_SLUG}
@@ -205,9 +198,9 @@ if [ "$CURRENT_ENV" = "development" ]; then
  * Author URI: https://lugh-web.fr
 */
 EOF_STYLE
-     
+
             echo "[CustomScript] Creating functions.php for ${CUSTOM_THEME_SLUG}..."
-            cat << 'EOF_FUNCTIONS' > "${CUSTOM_THEME_PATH}/functions.php"
+            cat <<'EOF_FUNCTIONS' >"${CUSTOM_THEME_PATH}/functions.php"
 <?php
 add_action('wp_enqueue_scripts', 'theme_enqueue_styles_scripts');
 function theme_enqueue_styles_scripts()
@@ -279,36 +272,61 @@ add_action('wp_enqueue_scripts', function () {
 EOF_FUNCTIONS
             echo "[CustomScript] Child theme ${CUSTOM_THEME_SLUG} basic files created at ${CUSTOM_THEME_PATH}."
 
-             echo "[CustomScript] Creating .gitignore for ${CUSTOM_THEME_SLUG}..."
-            cat << EOF_GITIGNORE > "${CUSTOM_THEME_PATH}/.gitignore"
+            echo "[CustomScript] Creating .gitignore for ${CUSTOM_THEME_SLUG}..."
+            cat <<EOF_GITIGNORE >"${CUSTOM_THEME_PATH}/.gitignore"
 node_modules/
 package-lock.json
 vendor/
 composer.lock
 EOF_GITIGNORE
-    
+
             echo "[CustomScript] Setting up Node.js environment, Tailwind CSS, and Terser in ${CUSTOM_THEME_PATH}..."
-            ( 
-                cd "${CUSTOM_THEME_PATH}" || { echo "[CustomScript ERROR] Failed to cd into ${CUSTOM_THEME_PATH}"; exit 1; }
+            (
+                cd "${CUSTOM_THEME_PATH}" || {
+                    echo "[CustomScript ERROR] Failed to cd into ${CUSTOM_THEME_PATH}"
+                    exit 1
+                }
 
                 echo "[CustomScript] Initializing npm package (package.json)..."
-                npm init -y --scope "${CUSTOM_THEME_SLUG}" > /dev/null 2>&1 
+                npm init -y --scope "${CUSTOM_THEME_SLUG}" >/dev/null 2>&1
 
                 echo "[CustomScript] Installing Tailwind CSS, its plugins, PostCSS, Autoprefixer, and Terser as dev dependencies..."
-                npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer terser
+                npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer terser browser-sync concurrently
 
-                echo "[CustomScript] Configuring package.json scripts for Tailwind v4..."
-                npm pkg set scripts.dev="npx @tailwindcss/cli -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
-                npm pkg set scripts.build="npx @tailwindcss/cli -i ./tailwind-input.css -o ./assets/css/tailwind.css --minify && npx terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
+                echo "[CustomScript] Creating browsersync.config.js for ${CUSTOM_THEME_SLUG}..."
+                cat <<EOF_BROWSERSYNC_CONFIG >./browsersync.config.js
+module.exports = {
+  proxy: "localhost:${WORDPRESS_HOST_PORT}",
+  files: [
+    "**/*.css",
+    "**/*.php",
+    "**/*.twig",
+    "**/*.js"
+  ],
+  port: 3000,
+  notify: false,
+  ui: {
+    port: 3001
+  }
+};
+EOF_BROWSERSYNC_CONFIG
+
+                echo "[CustomScript] Configuring package.json scripts for Tailwind v4, BrowserSync and Terser..."
+
+                npm pkg set scripts.browsersync="browser-sync start --config browsersync.config.js"
+                npm pkg set scripts.terser-minify="terser ./assets/js/scripts.js -o ./assets/js/scripts.min.js -c -m"
+                npm pkg set scripts.tailwind-watch="npx @tailwindcss/cli -i ./tailwind-input.css -o ./assets/css/tailwind.css --watch"
+                npm pkg set scripts.dev="npx concurrently npm:tailwind-watch npm:terser-minify npm:browsersync"
+                npm pkg set scripts.build="npx concurrently npm:tailwind-watch npm:terser-minify"
 
                 echo "[CustomScript] Creating Tailwind input CSS file (tailwind-input.css) for v4..."
                 mkdir -p ./assets/css
-                cat << 'EOF_TAILWIND_INPUT_CSS_V4' > ./tailwind-input.css
+                cat <<'EOF_TAILWIND_INPUT_CSS_V4' >./tailwind-input.css
 /* Explicitly define content paths here for Tailwind v4 */
 @content './views/**/*.twig';
 @content './*.php';
 @content './assets/js/**/*.js';
-@content './tailwind-input.css'; /* Include itself if it contains classes or is used for @theme */
+@content './tailwind-input.css';
 
 /* Import Tailwind's base, components, and utilities for v4 */
 @import "tailwindcss";
@@ -335,8 +353,8 @@ EOF_TAILWIND_INPUT_CSS_V4
 
                 echo "[CustomScript] Creating JavaScript directory and initial script file (assets/js/scripts.js)..."
                 mkdir -p ./assets/js
-                touch ./assets/js/scripts.js 
-            ) 
+                touch ./assets/js/scripts.js
+            )
             echo "[CustomScript] Node.js, Tailwind CSS, and Terser setup complete for ${CUSTOM_THEME_SLUG}."
 
         else
@@ -347,7 +365,6 @@ EOF_TAILWIND_INPUT_CSS_V4
 
         ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
     fi
-
 
     if [ -d "${CUSTOM_THEME_PATH}" ]; then
         CUSTOM_THEME_STATUS=$(wp theme status "${CUSTOM_THEME_SLUG}" --path="${WP_PATH}" --allow-root --field=status 2>/dev/null || echo "not-installed")
@@ -364,7 +381,7 @@ EOF_TAILWIND_INPUT_CSS_V4
     else
         echo "[CustomScript WARNING] Custom theme ${CUSTOM_THEME_SLUG} not found. Cannot activate."
     fi
-else  
+else
     echo "[CustomScript] In production mode. Ensuring custom theme is active if it exists, otherwise Timber starter, otherwise default."
     ensure_composer_install "${STARTER_THEME_PATH}" "${STARTER_THEME_SLUG}"
     ensure_composer_install "${CUSTOM_THEME_PATH}" "${CUSTOM_THEME_SLUG}"
@@ -386,19 +403,19 @@ else
                 else
                     DEFAULT_THEME=$(wp theme list --field=name --path="${WP_PATH}" --allow-root | head -n 1)
                     if [ -n "$DEFAULT_THEME" ]; then
-                         echo "[CustomScript WARNING] ${STARTER_THEME_SLUG} not found. Attempting to activate default theme: $DEFAULT_THEME"
-                         if wp theme activate "$DEFAULT_THEME" --path="${WP_PATH}" --allow-root; then
+                        echo "[CustomScript WARNING] ${STARTER_THEME_SLUG} not found. Attempting to activate default theme: $DEFAULT_THEME"
+                        if wp theme activate "$DEFAULT_THEME" --path="${WP_PATH}" --allow-root; then
                             echo "[CustomScript] Default theme $DEFAULT_THEME activated."
-                         else
+                        else
                             echo "[CustomScript ERROR] Failed to activate default theme $DEFAULT_THEME in production. Manual intervention required."
-                         fi
+                        fi
                     else
                         echo "[CustomScript ERROR] No themes found to activate in production. WordPress may not function correctly."
                     fi
                 fi
             fi
         elif [ -d "${STARTER_THEME_PATH}" ]; then
-             echo "[CustomScript WARNING] Custom theme ${CUSTOM_THEME_SLUG} not found. Attempting to activate ${STARTER_THEME_SLUG}."
+            echo "[CustomScript WARNING] Custom theme ${CUSTOM_THEME_SLUG} not found. Attempting to activate ${STARTER_THEME_SLUG}."
             if wp theme activate "${STARTER_THEME_SLUG}" --path="${WP_PATH}" --allow-root; then
                 echo "[CustomScript] Theme ${STARTER_THEME_SLUG} activated."
             else
@@ -407,12 +424,12 @@ else
         else
             DEFAULT_THEME=$(wp theme list --field=name --path="${WP_PATH}" --allow-root | head -n 1)
             if [ -n "$DEFAULT_THEME" ]; then
-                 echo "[CustomScript WARNING] Neither custom nor starter theme found. Attempting to activate default theme: $DEFAULT_THEME"
-                 if wp theme activate "$DEFAULT_THEME" --path="${WP_PATH}" --allow-root; then
+                echo "[CustomScript WARNING] Neither custom nor starter theme found. Attempting to activate default theme: $DEFAULT_THEME"
+                if wp theme activate "$DEFAULT_THEME" --path="${WP_PATH}" --allow-root; then
                     echo "[CustomScript] Default theme $DEFAULT_THEME activated."
-                 else
+                else
                     echo "[CustomScript ERROR] Failed to activate default theme $DEFAULT_THEME in production. Manual intervention required."
-                 fi
+                fi
             else
                 echo "[CustomScript ERROR] No themes found to activate in production. WordPress may not function correctly."
             fi
@@ -420,28 +437,27 @@ else
     else
         echo "[CustomScript] Active theme in production: $ACTIVE_THEME."
     fi
-fi 
-
+fi
 
 PLUGINS_TO_INSTALL=(
-  "advanced-custom-fields"
-  "wordpress-seo"
-  "litespeed-cache"
-  "contact-form-7"
+    "advanced-custom-fields"
+    "wordpress-seo"
+    "litespeed-cache"
+    "contact-form-7"
 )
 
 if [ "$CURRENT_ENV" = "development" ]; then
     echo "[CustomScript] In development mode, ensuring plugins are installed and active."
     for plugin_slug in "${PLUGINS_TO_INSTALL[@]}"; do
-      if ! wp plugin is-installed "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
-        echo "[CustomScript] Installing plugin $plugin_slug..."
-        wp plugin install "$plugin_slug" --activate --path="$WP_PATH" --allow-root || echo "[CustomScript WARNING] Failed to install/activate plugin $plugin_slug."
-      elif ! wp plugin is-active "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
-        echo "[CustomScript] Activating plugin $plugin_slug..."
-        wp plugin activate "$plugin_slug" --path="$WP_PATH" --allow-root || echo "[CustomScript WARNING] Failed to activate plugin $plugin_slug."
-      else
-        echo "[CustomScript] Plugin $plugin_slug is already installed and active."
-      fi
+        if ! wp plugin is-installed "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
+            echo "[CustomScript] Installing plugin $plugin_slug..."
+            wp plugin install "$plugin_slug" --activate --path="$WP_PATH" --allow-root || echo "[CustomScript WARNING] Failed to install/activate plugin $plugin_slug."
+        elif ! wp plugin is-active "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
+            echo "[CustomScript] Activating plugin $plugin_slug..."
+            wp plugin activate "$plugin_slug" --path="$WP_PATH" --allow-root || echo "[CustomScript WARNING] Failed to activate plugin $plugin_slug."
+        else
+            echo "[CustomScript] Plugin $plugin_slug is already installed and active."
+        fi
     done
 else
     echo "[CustomScript] In production mode, ensuring plugins are active if already installed."
@@ -459,28 +475,26 @@ else
     done
 fi
 
-
-ALL_CONFIG_ADDITIONS="" 
+ALL_CONFIG_ADDITIONS=""
 
 if ! grep -q "define( *'WP_CACHE' *, *true *);" "$WP_CONFIG_FILE"; then
     ALL_CONFIG_ADDITIONS="define( 'WP_CACHE', true );"
 fi
 
 if [ "$CURRENT_ENV" = "production" ]; then
-    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', true );\ndefine( 'DISALLOW_FILE_MODS', true );"
-elif [ "$CURRENT_ENV" = "development" ]; then 
-    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}\ndefine( 'AUTOMATIC_UPDATER_DISABLED', false );\ndefine( 'DISALLOW_FILE_MODS', false );"
+    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}ndefine( 'AUTOMATIC_UPDATER_DISABLED', true );ndefine( 'DISALLOW_FILE_MODS', true );"
+elif [ "$CURRENT_ENV" = "development" ]; then
+    ALL_CONFIG_ADDITIONS="${ALL_CONFIG_ADDITIONS}ndefine( 'AUTOMATIC_UPDATER_DISABLED', false );ndefine( 'DISALLOW_FILE_MODS', false );"
 fi
-
 
 if [ -f "$WP_CONFIG_FILE" ]; then
 
     echo "[CustomScript] Configuration constants will be applied to $WP_CONFIG_FILE."
 
     if [ -n "$ALL_CONFIG_ADDITIONS" ]; then
-      
+
         if ! grep -q "define( *'AUTOMATIC_UPDATER_DISABLED'" "$WP_CONFIG_FILE"; then
-            echo -e "\n${ALL_CONFIG_ADDITIONS}" >> "$WP_CONFIG_FILE"
+            echo -e "n${ALL_CONFIG_ADDITIONS}" >>"$WP_CONFIG_FILE"
             echo "[CustomScript] Added environment-specific constants to $WP_CONFIG_FILE."
         fi
     fi
@@ -488,5 +502,5 @@ fi
 
 echo "[CustomScript] Custom theme and plugin installation tasks complete."
 
-echo "[CustomScript] Script finished. Starting main process (exec \"$@\")..."
+echo "[CustomScript] Script finished. Starting main process (exec "$@")..."
 exec "$@"
