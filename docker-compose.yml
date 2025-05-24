@@ -24,13 +24,13 @@ services:
     restart: always
     volumes:
       - ./wp-content:/var/www/html/wp-content
-      - ./docker/custom-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
       WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_HOST_PORT: ${WORDPRESS_HOST_PORT:-8080}
       WORDPRESS_URL: ${WORDPRESS_URL}
       WORDPRESS_TITLE: ${WORDPRESS_TITLE}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}

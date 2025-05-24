@@ -1,40 +1,96 @@
-# WordPress Starter Kit avec Docker, Timber, Tailwind CSS et Terser
+# WordPress Starter Kit avec Docker, Timber, Webpack, Tailwind CSS v4 et Outils Modernes
 
-Ce projet est un kit de démarrage pour développer des sites WordPress modernes et performants en utilisant Docker. Il fournit un environnement de développement local complet, préconfiguré avec WordPress, MySQL, Redis, WP-CLI, Composer, Node.js (via NVM), Tailwind CSS v4, Terser, et msmtp pour l'envoi d'e-mails. Le projet met en place un thème enfant basé sur `timber-starter-theme` (le thème parent Timber officiel) et intègre une chaîne de compilation d'assets frontend.
+Ce projet est un kit de démarrage professionnel pour développer des sites WordPress modernes et performants en utilisant Docker. Il fournit un environnement de développement local complet, préconfiguré avec WordPress, MySQL, Redis, WP-CLI, Composer, Node.js (via NVM), et une chaîne de build moderne basée sur **Webpack 5**. Le projet met en place automatiquement un thème enfant basé sur `timber-starter-theme` avec une architecture frontend moderne incluant Tailwind CSS v4, BrowserSync, et des outils d'optimisation avancés.
 
-## Fonctionnalités Principales
+## 🚀 Fonctionnalités Principales
 
-*   **Environnement Dockerisé Complet** : Services WordPress, MySQL, et Redis gérés via `docker compose`.
-*   **WordPress Préconfiguré** : Installation automatisée de WordPress au premier lancement.
-*   **Thème Enfant Timber Automatisé** :
-    *   Création automatique d'un thème enfant basé sur `timber-starter-theme`.
-    *   Le nom du thème enfant est personnalisable via la variable d'environnement `CUSTOM_THEME_NAME`.
-    *   Le `composer.json` du thème parent est copié et les dépendances sont installées (`composer install`) dans le thème enfant.
-*   **Intégration Frontend Moderne** :
-    *   **Tailwind CSS v4** : Framework CSS utility-first pour un design rapide et personnalisé.
-    *   **Terser** : Minificateur JavaScript pour optimiser les scripts.
-    *   **npm scripts** : Scripts préconfigurés (`dev`, `build`) pour la compilation des assets (CSS et JS).
-    *   Structure de fichiers pour les assets (`assets/css`, `assets/js`, `tailwind-input.css`).
-*   **Outils de Développement Intégrés** :
-    *   **WP-CLI** : Outil en ligne de commande pour WordPress inclus dans le conteneur WordPress.
-    *   **Composer** : Gestionnaire de dépendances PHP inclus et utilisé pour le thème enfant.
-    *   **Node.js & NVM** : Inclut NVM pour gérer Node.js (version 22.10.0 par défaut) pour le développement frontend.
-*   **Optimisation et Utilitaires** :
-    *   **Redis** : Cache d'objets Redis préconfiguré pour améliorer les performances de WordPress.
-    *   **msmtp** : Configuration pour l'envoi d'e-mails via un serveur SMTP externe, facilitant les tests d'e-mails en développement.
-*   **Personnalisation Facile** : Configuration via des variables d'environnement dans un fichier `.env`.
-*   **Adapté aux Environnements de Développement et Production** : Comportement du site (mises à jour, modification de fichiers) adaptable via la variable `WORDPRESS_ENV`.
-*   **Contenu Persistant** : Le dossier `wp-content` est mappé pour conserver vos thèmes, plugins et uploads entre les sessions Docker.
-*   **Installation de Plugins (Optionnel)** : Le script d'entrée peut être facilement adapté pour installer et activer automatiquement une liste de plugins.
+### **Environnement de Développement Dockerisé**
+*   **Services Complets** : WordPress, MySQL, et Redis gérés via `docker compose`
+*   **Installation Automatisée** : WordPress configuré automatiquement au premier lancement
+*   **Contenu Persistant** : Le dossier `wp-content` est mappé pour conserver vos données entre les sessions
 
-## Prérequis
+### **Thème Enfant Timber Intelligent**
+*   **Création Automatique** : Génération d'un thème enfant basé sur `timber-starter-theme`
+*   **Personnalisation** : Nom du thème configurable via `CUSTOM_THEME_NAME`
+*   **Dépendances PHP** : `composer.json` copié et dépendances installées automatiquement
+*   **Architecture Moderne** : Séparation logique avec dossiers `inc/`, `views/`, `assets/`
+
+### **🔧 Chaîne de Build Webpack 5 Complète**
+*   **Configuration Avancée** : Webpack configuré pour développement et production
+*   **Build Intelligente** : 
+    *   Mode développement : Builds dans `dev_build/` avec source maps
+    *   Mode production : Builds optimisées dans `dist/` avec minification
+*   **Hot Reload** : Compilation automatique en mode watch
+*   **Optimisation Assets** : Clean automatique des builds précédentes
+
+### **🎨 Frontend Moderne et Optimisé**
+*   **Tailwind CSS v4** : Framework utility-first avec nouvelle architecture
+    *   Support complet des directives `@import "tailwindcss"`
+    *   Configuration `@content` pour la détection automatique
+    *   Layers personnalisables (`@layer base`, `@layer components`, `@layer utilities`)
+    *   Variables personnalisées avec `@theme`
+*   **JavaScript Moderne** :
+    *   Support ES6+ avec Babel
+    *   Bundling intelligent avec Webpack
+    *   GSAP inclus pour les animations
+    *   Modules ES6 supportés
+*   **Traitement CSS Avancé** :
+    *   PostCSS avec autoprefixer
+    *   Import CSS avec `postcss-import`
+    *   Extraction CSS avec `MiniCssExtractPlugin`
+
+### **⚡ Outils de Développement Intégrés**
+*   **BrowserSync** : 
+    *   Synchronisation temps réel sur port 3000
+    *   Injection CSS à chaud
+    *   Interface de contrôle sur port 3001
+    *   Proxy automatique vers WordPress (port 8080)
+*   **Scripts NPM Optimisés** :
+    *   `npm run dev` : Mode développement avec watch et BrowserSync
+    *   `npm run build` : Build de production avec minification
+*   **Optimisation Production** :
+    *   Minification JavaScript avec Terser
+    *   Compression CSS optimisée
+    *   Cache busting automatique avec `filemtime()`
+
+### **🛠️ Stack Technique Complet**
+*   **Backend** : 
+    *   WP-CLI intégré dans le conteneur
+    *   Composer pour la gestion des dépendances PHP
+    *   Node.js 22.10.0 via NVM
+*   **Performance** :
+    *   Redis pour le cache d'objets
+    *   Optimisations WordPress (emojis, REST API, etc.)
+    *   Désactivation sélective des styles inutiles
+*   **Sécurité** :
+    *   Configuration sécurisée par défaut
+    *   Suppression des en-têtes WordPress sensibles
+    *   Protection contre l'édition de fichiers
+*   **Communication** :
+    *   msmtp pour l'envoi d'e-mails via SMTP
+    *   Configuration Mailtrap recommandée pour le développement
+
+### **🔒 Gestion d'Environnements**
+*   **Mode Développement** (`WORDPRESS_ENV=development`) :
+    *   Modifications de fichiers autorisées
+    *   Erreurs PHP affichées
+    *   Assets non minifiés avec source maps
+    *   BrowserSync activé
+*   **Mode Production** (`WORDPRESS_ENV=production`) :
+    *   Modifications de fichiers bloquées
+    *   Assets minifiés et optimisés
+    *   Sécurité renforcée
+    *   Performance maximisée
+
+## 📋 Prérequis
 
 *   [Docker](https://docs.docker.com/get-docker/)
 *   [Docker Compose](https://docs.docker.com/compose/install/) (généralement inclus avec Docker Desktop)
+*   Un navigateur moderne pour tester les fonctionnalités frontend
 
-## Démarrage Rapide
+## 🚀 Démarrage Rapide
 
-1.  **Cloner le dépôt** (si ce n'est pas déjà fait) :
+1.  **Cloner le dépôt** :
     ```bash
     git clone <votre-url-de-repo>
     cd <nom-du-dossier-du-projet>
@@ -45,243 +101,774 @@ Ce projet est un kit de démarrage pour développer des sites WordPress modernes
     ```bash
     cp .env.example .env
     ```
-    Modifiez le fichier `.env` avec vos propres informations. Points clés à vérifier :
-    *   `WORDPRESS_DB_USER`, `WORDPRESS_DB_PASSWORD`, `WORDPRESS_DB_NAME`, `MYSQL_ROOT_PASSWORD` : Identifiants de la base de données.
-    *   `WORDPRESS_URL` : URL complète de votre site WordPress local (ex: `http://localhost:8080`).
-    *   `WORDPRESS_HOST_PORT` : Port sur votre machine hôte pour accéder à WordPress (doit correspondre à `WORDPRESS_URL`).
-    *   `CUSTOM_THEME_NAME` : Nom (slug) de votre thème enfant (ex: `mon-super-theme`). Par défaut `starter`.
-    *   `MSMTP_HOST`, `MSMTP_PORT`, etc. : Vos identifiants pour le serveur SMTP (Mailtrap est un bon choix pour le développement).
+    Modifiez le fichier `.env` avec vos propres informations. **Points clés à configurer** :
+    *   `WORDPRESS_DB_USER`, `WORDPRESS_DB_PASSWORD`, `WORDPRESS_DB_NAME`, `MYSQL_ROOT_PASSWORD` : Identifiants de la base de données
+    *   `WORDPRESS_URL` : URL complète de votre site WordPress local (ex: `http://localhost:8080`)
+    *   `WORDPRESS_HOST_PORT` : Port sur votre machine hôte (doit correspondre à `WORDPRESS_URL`)
+    *   `CUSTOM_THEME_NAME` : Nom (slug) de votre thème enfant (ex: `mon-super-theme`)
+    *   `WORDPRESS_ENV` : `development` pour le développement, `production` pour la production
+    *   Variables SMTP : `MSMTP_HOST`, `MSMTP_PORT`, etc. (Mailtrap recommandé pour le développement)
 
 3.  **Lancer les conteneurs Docker** :
-    À la racine du projet, exécutez :
     ```bash
     docker compose up -d --build
     ```
-    L'option `--build` est recommandée au premier lancement ou après des modifications du `Dockerfile` ou du script `custom-entrypoint.sh`. Cette commande va construire les images et démarrer les services en arrière-plan.
+    L'option `--build` est recommandée au premier lancement pour construire les images avec toutes les dépendances.
 
-4.  **Premier Lancement et Installation** :
-    Lors du premier lancement, le script `custom-entrypoint.sh` va :
-    *   Attendre que la base de données MySQL soit prête.
-    *   Installer WordPress si ce n'est pas déjà fait.
-    *   Configurer `wp-config.php` avec les informations du `.env` et les clés de sécurité.
-    *   Configurer `msmtp` pour l'envoi d'e-mails.
-    *   Cloner le thème `timber-starter-theme` s'il n'existe pas.
-    *   Créer le thème enfant :
-        *   Créer le dossier du thème enfant dans `wp-content/themes/`.
-        *   Générer `style.css` et `functions.php` pour le thème enfant.
-        *   Copier `composer.json` du parent et exécuter `composer install` dans le thème enfant.
-        *   Initialiser `package.json`, installer les dépendances Node.js (`tailwindcss`, `terser`, etc.).
-        *   Créer `tailwind-input.css` et les dossiers d'assets.
-        *   Compiler les assets initiaux avec `npm run build`.
-    *   Activer le thème enfant.
-    *   Installer et activer les plugins listés (si configuré).
-    *   Configurer les options WordPress pour l'environnement (`development` ou `production`).
+4.  **Installation Automatique** :
+    Le script `custom-entrypoint.sh` va automatiquement :
+    *   Attendre que MySQL soit prêt
+    *   Installer WordPress avec vos paramètres
+    *   Configurer `wp-config.php` et les clés de sécurité
+    *   Cloner et configurer `timber-starter-theme`
+    *   **Créer le thème enfant avec l'architecture Webpack** :
+        *   Génération de `package.json` avec toutes les dépendances
+        *   Installation automatique des packages npm
+        *   Configuration Webpack complète (`webpack.config.js`)
+        *   Fichiers PostCSS et BrowserSync
+        *   Structure d'assets moderne (`assets/css/main.css`, `assets/js/scripts.js`)
+        *   Build initiale des assets
+    *   Activer le thème enfant
+    *   Installer et activer les plugins essentiels
+    *   Configurer Redis et msmtp
 
 5.  **Accéder à WordPress** :
-    Ouvrez votre navigateur et allez à l'URL que vous avez définie dans `WORDPRESS_URL` (par exemple, `http://localhost:8080`).
-    Connectez-vous à l'administration avec les identifiants `WORDPRESS_ADMIN_USER` et `WORDPRESS_ADMIN_PASSWORD` définis dans votre `.env`. Votre thème enfant devrait être actif.
+    *   **Site principal** : `http://localhost:8080` (ou votre `WORDPRESS_URL`)
+    *   **BrowserSync** : `http://localhost:3000` (avec hot reload automatique)
+    *   **Interface BrowserSync** : `http://localhost:3001`
+    *   **Admin WordPress** : `http://localhost:8080/wp-admin`
 
-## Structure du Projet
+6.  **Démarrer le développement frontend** :
+    ```bash
+    # Accéder au conteneur
+    docker compose exec wordpress bash
+    
+    # Naviguer vers votre thème
+    cd wp-content/themes/[VOTRE_THEME_NAME]
+    
+    # Lancer le mode développement avec watch + BrowserSync
+    npm run dev
+    ```
+
+## 📁 Structure du Projet
 
 ```
 .
-├── docker-compose.yml        # Configuration des services Docker (db, wordpress, redis)
-├── .env.example              # Fichier d'exemple pour les variables d'environnement
-├── .env                      # Fichier de configuration de l'environnement (ignoré par Git)
-├── LICENSE                   # Licence du projet
-├── README.md                 # Ce fichier
+├── docker-compose.yml            # Configuration des services (WordPress, MySQL, Redis)
+├── .env.example                  # Template de configuration d'environnement
+├── .env                         # Configuration d'environnement (ignoré par Git)
+├── LICENSE                      # Licence du projet
+├── README.md                    # Documentation complète
 ├── docker/
-│   ├── Dockerfile--wordpress # Dockerfile pour l'image WordPress personnalisée
-│   │                         # (installe PHP, NVM, Node.js, Composer, WP-CLI, msmtp, etc.)
-│   └── custom-entrypoint.sh  # Script d'initialisation pour le conteneur WordPress
-└── wp-content/               # Dossier WordPress pour thèmes, plugins, uploads (mappé)
-    ├── themes/               # Contient le thème parent timber-starter-theme et votre thème enfant
-    │   ├── timber-starter-theme/ # Thème parent (géré par le script)
-    │   └── [CUSTOM_THEME_NAME]/  # Votre thème enfant (généré par le script)
-    │       ├── assets/
+│   ├── Dockerfile--wordpress    # Image WordPress personnalisée avec tous les outils
+│   ├── custom-entrypoint.sh     # Script d'initialisation principal
+│   └── scripts/                 # Scripts modulaires d'initialisation
+│       ├── init-variables.sh    # Initialisation des variables
+│       ├── check-dependencies.sh # Vérification des dépendances
+│       ├── setup-wordpress-core.sh # Installation WordPress
+│       ├── manage-themes.sh     # Gestion des thèmes + build Webpack
+│       ├── manage-plugins.sh    # Installation des plugins
+│       ├── configure-redis.sh   # Configuration Redis
+│       ├── configure-msmtp.sh   # Configuration email
+│       └── finalize-config.sh   # Finalisation de la configuration
+└── wp-content/                  # Contenu WordPress persistant
+    ├── themes/
+    │   ├── timber-starter-theme/ # Thème parent Timber officiel
+    │   └── [CUSTOM_THEME_NAME]/  # Votre thème enfant avec architecture Webpack
+    │       ├── style.css         # Informations du thème enfant
+    │       ├── functions.php     # Fonctions PHP et enqueue des assets
+    │       ├── package.json      # Dépendances npm et scripts de build
+    │       ├── webpack.config.js # Configuration Webpack complète
+    │       ├── postcss.config.js # Configuration PostCSS
+    │       ├── browsersync.config.js # Configuration BrowserSync
+    │       ├── .gitignore        # Exclusions Git (node_modules, dist, etc.)
+    │       ├── composer.json     # Dépendances PHP (copié du parent)
+    │       ├── vendor/           # Dépendances PHP (Timber, etc.)
+    │       ├── node_modules/     # Dépendances npm (généré automatiquement)
+    │       ├── dist/             # Assets de production (minifiés)
+    │       │   ├── main.min.js   # JavaScript optimisé
+    │       │   └── styles.min.css # CSS optimisé
+    │       ├── dev_build/        # Assets de développement
+    │       │   ├── main.js       # JavaScript avec source maps
+    │       │   └── styles.css    # CSS non minifié
+    │       ├── assets/           # Sources des assets
     │       │   ├── css/
-    │       │   │   └── tailwind.css  # CSS compilé par Tailwind
+    │       │   │   └── main.css  # CSS principal avec Tailwind v4
     │       │   └── js/
-    │       │       ├── scripts.js      # Votre JS principal
-    │       │       └── scripts.min.js  # JS minifié par Terser
-    │       ├── node_modules/       # Dépendances Node.js (géré par npm)
-    │       ├── vendor/             # Dépendances PHP (géré par Composer)
-    │       ├── views/              # Fichiers Twig pour Timber (à créer)
-    │       ├── composer.json       # Dépendances PHP du thème enfant
-    │       ├── functions.php       # Fonctions du thème enfant
-    │       ├── package.json        # Dépendances et scripts Node.js
-    │       ├── style.css           # Informations du thème enfant
-    │       └── tailwind-input.css  # Fichier source pour Tailwind CSS
-    ├── plugins/                # Plugins WordPress
-    └── uploads/                # Fichiers uploadés
+    │       │       └── scripts.js # JavaScript principal (ES6+)
+    │       ├── inc/              # Fichiers PHP modulaires
+    │       │   ├── performance.php # Optimisations WordPress
+    │       │   └── security.php  # Sécurisations WordPress
+    │       └── views/            # Templates Twig (à créer selon besoins)
+    ├── plugins/                  # Plugins WordPress
+    │   ├── advanced-custom-fields/
+    │   ├── wordpress-seo/
+    │   ├── litespeed-cache/
+    │   ├── contact-form-7/
+    │   └── redis-cache/
+    └── uploads/                  # Fichiers uploadés
 ```
 
-## Variables d'Environnement
+## ⚙️ Variables d'Environnement
 
 Configurez ces variables dans votre fichier `.env` :
 
-*   **WordPress Database Settings**:
-    *   `WORDPRESS_DB_HOST`: Hôte de la base de données (par défaut `db`, le nom du service MySQL dans Docker).
-    *   `WORDPRESS_DB_USER`: Utilisateur de la base de données.
-    *   `WORDPRESS_DB_PASSWORD`: Mot de passe de l'utilisateur.
-    *   `WORDPRESS_DB_NAME`: Nom de la base de données.
-    *   `MYSQL_ROOT_PASSWORD`: Mot de passe root pour le serveur MySQL.
+### **Configuration Base de Données**
+*   `WORDPRESS_DB_HOST` : Hôte de la base de données (par défaut `db`)
+*   `WORDPRESS_DB_USER` : Utilisateur de la base de données
+*   `WORDPRESS_DB_PASSWORD` : Mot de passe de l'utilisateur
+*   `WORDPRESS_DB_NAME` : Nom de la base de données
+*   `MYSQL_ROOT_PASSWORD` : Mot de passe root pour MySQL
 
-*   **WordPress Site Settings**:
-    *   `WORDPRESS_URL`: URL complète de votre site (ex: `http://localhost:8080`).
-    *   `WORDPRESS_TITLE`: Titre de votre site WordPress.
-    *   `WORDPRESS_ADMIN_USER`: Nom d'utilisateur de l'administrateur WordPress.
-    *   `WORDPRESS_ADMIN_PASSWORD`: Mot de passe de l'administrateur.
-    *   `WORDPRESS_ADMIN_EMAIL`: E-mail de l'administrateur.
-    *   `WORDPRESS_TABLE_PREFIX`: Préfixe des tables WordPress (par défaut `wp_`).
-    *   `CUSTOM_THEME_NAME`: Slug de votre thème enfant (ex: `mon-theme`). Par défaut `starter`.
+### **Configuration Site WordPress**
+*   `WORDPRESS_URL` : URL complète du site (ex: `http://localhost:8080`)
+*   `WORDPRESS_TITLE` : Titre de votre site WordPress
+*   `WORDPRESS_ADMIN_USER` : Nom d'utilisateur administrateur
+*   `WORDPRESS_ADMIN_PASSWORD` : Mot de passe administrateur
+*   `WORDPRESS_ADMIN_EMAIL` : Email de l'administrateur
+*   `WORDPRESS_TABLE_PREFIX` : Préfixe des tables (par défaut `wp_`)
+*   `CUSTOM_THEME_NAME` : Slug de votre thème enfant (ex: `mon-theme`)
 
-*   **Environment Configuration**:
-    *   `WORDPRESS_ENV`: `development` ou `production`.
-        *   `development`: Mises à jour automatiques désactivées, modifications de fichiers autorisées, erreurs PHP affichées.
-        *   `production`: Mises à jour automatiques désactivées, modifications de fichiers bloquées pour plus de sécurité.
+### **Configuration Environnement** ⚡
+*   `WORDPRESS_ENV` : 
+    *   `development` : Mode développement avec BrowserSync, assets non minifiés, erreurs affichées
+    *   `production` : Mode production avec assets optimisés, sécurité renforcée
 
-*   **Docker Settings**:
-    *   `WORDPRESS_HOST_PORT`: Port sur la machine hôte pour accéder à WordPress (ex: `8080`). Doit correspondre au port dans `WORDPRESS_URL`.
+### **Configuration Docker**
+*   `WORDPRESS_HOST_PORT` : Port sur la machine hôte (ex: `8080`)
 
-*   **Redis Settings**:
-    *   `WORDPRESS_REDIS_HOST`: Hôte Redis (par défaut `redis`, le nom du service Redis dans Docker).
-    *   `WORDPRESS_REDIS_PORT`: Port Redis (par défaut `6379`).
+### **Configuration Redis** (Cache d'objets)
+*   `WORDPRESS_REDIS_HOST` : Hôte Redis (par défaut `redis`)
+*   `WORDPRESS_REDIS_PORT` : Port Redis (par défaut `6379`)
 
-*   **SMTP (msmtp) Configuration**:
-    *   `MSMTP_HOST`: Serveur SMTP (ex: `sandbox.smtp.mailtrap.io`).
-    *   `MSMTP_PORT`: Port SMTP (ex: `587`).
-    *   `MSMTP_FROM`: Adresse e-mail d'expédition par défaut.
-    *   `MSMTP_AUTH`: Authentification (`on` ou `off`).
-    *   `MSMTP_USER`: Nom d'utilisateur SMTP.
-    *   `MSMTP_PASSWORD`: Mot de passe SMTP.
-    *   `MSMTP_TLS`: Utiliser TLS (`on` ou `off`).
-    *   `MSMTP_TLS_STARTTLS`: Utiliser STARTTLS (`on` ou `off`).
-    *   `MSMTP_LOGFILE`: Chemin du fichier de log pour msmtp (ex: `/tmp/msmtp.log`).
+### **Configuration SMTP** (Emails via msmtp)
+*   `MSMTP_HOST` : Serveur SMTP (ex: `sandbox.smtp.mailtrap.io`)
+*   `MSMTP_PORT` : Port SMTP (ex: `587`)
+*   `MSMTP_FROM` : Adresse email d'expédition
+*   `MSMTP_AUTH` : Authentification (`on` ou `off`)
+*   `MSMTP_USER` : Nom d'utilisateur SMTP
+*   `MSMTP_PASSWORD` : Mot de passe SMTP
+*   `MSMTP_TLS` : Utiliser TLS (`on` ou `off`)
+*   `MSMTP_TLS_STARTTLS` : Utiliser STARTTLS (`on` ou `off`)
+*   `MSMTP_LOGFILE` : Fichier de log msmtp (ex: `/tmp/msmtp.log`)
 
-## Développement
+## 🛠️ Guide de Développement
 
-### Accéder au Conteneur WordPress
+### **Accéder au Conteneur WordPress**
 
-Pour exécuter des commandes à l'intérieur du conteneur WordPress (WP-CLI, Composer, NPM, etc.), utilisez `docker compose exec`. Le nom du service WordPress est défini dans `docker-compose.yml` (par défaut `wordpress`).
+```bash
+# Accéder au shell du conteneur
+docker compose exec wordpress bash
 
+# Vérifier l'environnement Node.js
+node --version  # Devrait afficher v22.10.0
+npm --version   # Devrait afficher la version npm correspondante
+```
+
+### **🔧 Développement Frontend avec Webpack**
+
+#### **Architecture des Assets**
+
+Le système de build Webpack est configuré pour gérer intelligemment les environnements :
+
+```bash
+# Naviguer vers votre thème
+cd wp-content/themes/[CUSTOM_THEME_NAME]
+
+# Structure des assets
+assets/css/main.css          # Source Tailwind CSS v4
+assets/js/scripts.js         # Source JavaScript ES6+
+dev_build/                   # Build de développement (non minifié)
+dist/                        # Build de production (optimisé)
+```
+
+#### **Scripts NPM Disponibles**
+
+```bash
+# Mode développement avec watch + BrowserSync
+npm run dev
+# - Compilation automatique en mode watch
+# - BrowserSync sur localhost:3000
+# - Source maps activées
+# - Assets dans dev_build/
+
+# Build de production
+npm run build  
+# - Minification avec Terser
+# - Optimisation CSS
+# - Assets dans dist/
+# - Cache busting automatique
+```
+
+#### **Configuration Tailwind CSS v4**
+
+Le fichier `assets/css/main.css` utilise la nouvelle syntaxe Tailwind v4 :
+
+```css
+/* Import Tailwind's base, components, and utilities for v4 */
+@import "tailwindcss";
+
+/* Explicitly define content paths for Tailwind v4 */
+@content '../../views/**/*.twig';
+@content '../../*.php';
+@content '../js/**/*.js';
+
+/* Custom layers */
+@layer base {
+  /* Vos styles de base */
+}
+
+@layer components {
+  /* Vos composants réutilisables */
+}
+
+@layer utilities {
+  /* Vos utilitaires personnalisés */
+}
+
+/* Custom theme variables for Tailwind v4 */
+@theme {
+  /* Variables CSS personnalisées */
+}
+```
+
+#### **JavaScript Moderne avec ES6+**
+
+Le fichier `assets/js/scripts.js` supporte les modules ES6 et les imports :
+
+```javascript
+import { gsap } from 'gsap';
+
+// Votre code JavaScript moderne
+addEventListener('DOMContentLoaded', function() {
+   console.log('🔧 Webpack entry file loaded');
+   
+   // Utilisation de GSAP
+   gsap.from('.my-element', {duration: 2, y: 50, opacity: 0});
+});
+```
+
+#### **BrowserSync et Hot Reload**
+
+En mode développement, BrowserSync est automatiquement configuré :
+- **Proxy principal** : `localhost:3000` (avec hot reload)
+- **Interface de contrôle** : `localhost:3001`
+- **Synchronisation** : CSS, PHP, Twig, JS
+- **Injection CSS** : Changements appliqués sans rechargement de page
+
+### **🔨 Gestion des Dépendances**
+
+#### **Dépendances PHP avec Composer**
+
+```bash
+# Dans le dossier de votre thème
+composer require mon-paquet/librairie    # Ajouter une dépendance
+composer update                         # Mettre à jour
+composer install                        # Installer (si vendor/ manquant)
+```
+
+#### **Dépendances JavaScript avec npm**
+
+```bash
+# Ajouter des dépendances
+npm install lodash --save               # Dépendance de production
+npm install @types/node --save-dev      # Dépendance de développement
+
+# Mettre à jour les dépendances
+npm update
+
+# Auditer la sécurité
+npm audit --fix
+```
+
+### **📝 Utilisation de WP-CLI**
+
+WP-CLI est préinstallé et accessible globalement. **Important** : Utilisez toujours `--allow-root` :
+
+```bash
+# Exemples courants
+wp plugin list --allow-root
+wp plugin install jetpack --activate --allow-root
+wp theme list --allow-root
+wp cache flush --allow-root
+wp db cli --allow-root
+
+# Gestion des utilisateurs
+wp user list --allow-root
+wp user create john john@example.com --role=editor --allow-root
+
+# Import/Export de contenu
+wp db export backup.sql --allow-root
+wp db import backup.sql --allow-root
+```
+
+### **📊 Monitoring et Logs**
+
+```bash
+# Logs des services Docker
+docker compose logs wordpress           # Logs WordPress
+docker compose logs -f wordpress       # Suivre les logs en temps réel
+docker compose logs db                 # Logs MySQL
+docker compose logs redis              # Logs Redis
+
+# Status des conteneurs
+docker compose ps
+
+# Redémarrer un service
+docker compose restart wordpress
+```
+
+## 🏗️ Architecture du Thème Enfant
+
+### **Structure et Organisation**
+
+Le thème enfant généré automatiquement suit une architecture moderne et modulaire :
+
+```
+[CUSTOM_THEME_NAME]/
+├── style.css                    # Informations du thème (nom, version, parent)
+├── functions.php                # Point d'entrée principal + enqueue des assets
+├── .gitignore                   # Exclusions Git (node_modules, dist, etc.)
+│
+├── inc/                         # Modules PHP organisés
+│   ├── performance.php          # Optimisations WordPress
+│   └── security.php             # Sécurisations WordPress
+│
+├── assets/                      # Sources des assets (non compilés)
+│   ├── css/
+│   │   └── main.css            # CSS principal avec Tailwind v4
+│   └── js/
+│       └── scripts.js          # JavaScript ES6+ principal
+│
+├── dev_build/                   # Assets de développement (généré)
+│   ├── main.js                 # JavaScript avec source maps
+│   └── styles.css              # CSS non minifié avec source maps
+│
+├── dist/                        # Assets de production (généré)
+│   ├── main.min.js             # JavaScript optimisé et minifié
+│   └── styles.min.css          # CSS optimisé et minifié
+│
+├── views/                       # Templates Twig (à créer selon besoins)
+│   ├── base.twig               # Template de base
+│   ├── index.twig              # Page d'accueil
+│   └── single.twig             # Article/page individuelle
+│
+├── node_modules/                # Dépendances npm (auto-généré)
+├── vendor/                      # Dépendances PHP Composer (auto-généré)
+│
+└── Configuration Build
+    ├── package.json             # Dépendances npm + scripts
+    ├── webpack.config.js        # Configuration Webpack complète
+    ├── postcss.config.js        # Configuration PostCSS
+    ├── browsersync.config.js    # Configuration BrowserSync
+    └── composer.json            # Dépendances PHP (copié du parent)
+```
+
+### **🎨 Système d'Assets Intelligent**
+
+#### **Enqueue Automatique selon l'Environnement**
+
+Le `functions.php` détecte automatiquement l'environnement via `WORDPRESS_ENV` :
+
+```php
+$wordpress_env = getenv('WORDPRESS_ENV');
+
+if ($wordpress_env === 'development') {
+    // Assets de développement (non minifiés, avec source maps)
+    $css_file = '/dev_build/styles.css';
+    $js_file = '/dev_build/main.js';
+} else {
+    // Assets de production (minifiés, optimisés)
+    $css_file = '/dist/styles.min.css';
+    $js_file = '/dist/main.min.js';
+}
+```
+
+#### **Cache Busting Automatique**
+
+Les assets utilisent `filemtime()` pour un cache busting automatique :
+
+```php
+wp_enqueue_style(
+    'tailwind-style',
+    get_stylesheet_directory_uri() . $css_file,
+    array('child-style'),
+    filemtime(get_stylesheet_directory() . $css_file)
+);
+```
+
+#### **Support ES6 Modules**
+
+Les scripts JavaScript sont chargés comme modules ES6 :
+
+```php
+function add_type_attribute_to_script($tag, $handle, $src) {
+    if ('child-scripts' === $handle) {
+        $tag = '<script type="module" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
+    }
+    return $tag;
+}
+```
+
+### **⚡ Optimisations WordPress Intégrées**
+
+#### **Performance (`inc/performance.php`)**
+- Suppression des emojis WordPress
+- Désactivation des styles de blocs inutiles
+- Optimisation des en-têtes HTTP
+- Suppression des générateurs de version
+
+#### **Sécurité (`inc/security.php`)**
+- Désactivation de XML-RPC
+- Suppression des informations de version
+- Protection contre l'édition de fichiers
+- Nettoyage des en-têtes sensibles
+
+### **🔧 Configuration Webpack Avancée**
+
+#### **Entrées Multiples**
+```javascript
+entry: {
+  main: './assets/js/scripts.js',     // JavaScript principal
+  styles: './assets/css/main.css'     // CSS principal
+}
+```
+
+#### **Optimisation Conditionnelle**
+- **Développement** : Source maps, builds rapides, BrowserSync
+- **Production** : Minification Terser, optimisation CSS, cache busting
+
+#### **Loaders Configurés**
+- **Babel** : Transpilation ES6+ vers ES5
+- **PostCSS** : Traitement CSS avec Tailwind v4 et autoprefixer
+- **CSS Loader** : Gestion des imports et modules CSS
+
+### **🎯 Points d'Extension Recommandés**
+
+#### **Ajout de Templates Twig**
+```bash
+# Créer vos templates dans views/
+mkdir -p views/components
+touch views/components/header.twig
+touch views/components/footer.twig
+```
+
+#### **Ajout de Dépendances**
+```bash
+# JavaScript
+npm install swiper --save
+npm install @types/swiper --save-dev
+
+# PHP
+composer require twig/twig
+```
+
+#### **Personnalisation Tailwind**
+Créez un `tailwind.config.js` pour des personnalisations avancées :
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#your-color'
+      }
+    }
+  }
+}
+```
+
+## 📧 Configuration des E-mails (msmtp)
+
+Le conteneur WordPress utilise `msmtp` pour envoyer des e-mails via un serveur SMTP externe, essentiel pour tester les fonctionnalités email en développement.
+
+### **Configuration Recommandée : Mailtrap**
+
+Pour le développement, [Mailtrap.io](https://mailtrap.io) est idéal car il capture tous les e-mails sans les délivrer :
+
+```env
+# Dans votre .env
+MSMTP_HOST=sandbox.smtp.mailtrap.io
+MSMTP_PORT=587
+MSMTP_FROM=noreply@votre-site.local
+MSMTP_AUTH=on
+MSMTP_USER=votre_username_mailtrap
+MSMTP_PASSWORD=votre_password_mailtrap
+MSMTP_TLS=off
+MSMTP_TLS_STARTTLS=on
+MSMTP_LOGFILE=/tmp/msmtp.log
+```
+
+Le fichier `/etc/msmtprc` est généré automatiquement au démarrage du conteneur.
+
+## 🚨 Dépannage
+
+### **Problèmes Courants**
+
+#### **Permissions sur `wp-content`**
+```bash
+# Vérifier les permissions
+ls -la wp-content/
+
+# Corriger si nécessaire (Linux/Mac)
+sudo chown -R $USER:$USER wp-content/
+chmod -R 755 wp-content/
+```
+
+#### **Le site ne se charge pas**
+```bash
+# Vérifier les logs
+docker compose logs wordpress
+docker compose logs db
+
+# Vérifier la configuration
+grep WORDPRESS_URL .env
+grep WORDPRESS_HOST_PORT .env
+```
+
+#### **Erreurs npm/Webpack**
+```bash
+# Accéder au conteneur
+docker compose exec wordpress bash
+cd wp-content/themes/[THEME_NAME]
+
+# Vérifier Node.js
+node --version
+npm --version
+
+# Nettoyer et réinstaller
+rm -rf node_modules package-lock.json
+npm install
+
+# Tester la build
+npm run build
+```
+
+#### **BrowserSync ne fonctionne pas**
+```bash
+# Vérifier que le mode dev est actif
+npm run dev
+
+# Vérifier les ports
+netstat -tlnp | grep :3000
+netstat -tlnp | grep :3001
+
+# Accéder via les bonnes URLs
+# Site principal: http://localhost:8080
+# BrowserSync: http://localhost:3000
+# Interface BrowserSync: http://localhost:3001
+```
+
+#### **Assets CSS/JS ne se chargent pas**
+```bash
+# Vérifier l'environnement WordPress
+echo $WORDPRESS_ENV
+
+# En développement, vérifier dev_build/
+ls -la dev_build/
+
+# En production, vérifier dist/
+ls -la dist/
+
+# Forcer une rebuild
+npm run build
+```
+
+#### **Erreurs WP-CLI**
+```bash
+# Toujours utiliser --allow-root
+wp plugin list --allow-root
+
+# Vérifier les permissions de fichiers
+wp config path --allow-root
+```
+
+#### **MySQL indisponible**
+```bash
+# Vérifier le status des conteneurs
+docker compose ps
+
+# Redémarrer les services
+docker compose down
+docker compose up -d
+
+# Vérifier les logs MySQL
+docker compose logs db
+```
+
+#### **Changements Tailwind non reflétés**
+```bash
+# S'assurer que npm run dev est actif
+ps aux | grep webpack
+
+# Vérifier le fichier source
+cat assets/css/main.css
+
+# Vérifier la build
+cat dev_build/styles.css  # En développement
+cat dist/styles.min.css   # En production
+
+# Nettoyer le cache navigateur
+# Ctrl+F5 ou Cmd+Shift+R
+```
+
+### **Commandes de Diagnostic**
+
+```bash
+# Status complet des services
+docker compose ps -a
+
+# Logs détaillés
+docker compose logs --tail=100 wordpress
+
+# Ressources système
+docker stats
+
+# Nettoyage complet (⚠️ supprime les données)
+docker compose down -v
+docker system prune -af
+```
+
+## 🐳 Commandes Docker Compose Utiles
+
+### **Gestion des Services**
+```bash
+# Démarrer en arrière-plan
+docker compose up -d
+
+# Démarrer avec rebuild forcé
+docker compose up -d --build
+
+# Arrêter les services
+docker compose down
+
+# Arrêter et supprimer les volumes (⚠️ supprime la base de données !)
+docker compose down -v
+
+# Redémarrer un service spécifique
+docker compose restart wordpress
+```
+
+### **Monitoring et Logs**
+```bash
+# Status des conteneurs
+docker compose ps
+
+# Logs en temps réel
+docker compose logs -f wordpress
+docker compose logs -f db
+docker compose logs -f redis
+
+# Logs des dernières 100 lignes
+docker compose logs --tail=100 wordpress
+
+# Statistiques d'utilisation
+docker stats
+```
+
+### **Maintenance et Nettoyage**
+```bash
+# Reconstruire les images
+docker compose build
+
+# Nettoyer les images inutilisées
+docker image prune -f
+
+# Nettoyage complet du système Docker (⚠️ supprime tout)
+docker system prune -af
+
+# Sauvegarder la base de données
+docker compose exec db mysqldump -u root -p[MYSQL_ROOT_PASSWORD] [WORDPRESS_DB_NAME] > backup.sql
+
+# Restaurer la base de données
+docker compose exec -T db mysql -u root -p[MYSQL_ROOT_PASSWORD] [WORDPRESS_DB_NAME] < backup.sql
+```
+
+## 🚀 Workflow de Développement Recommandé
+
+### **Démarrage d'un Nouveau Projet**
+
+1. **Configuration initiale**
+```bash
+cp .env.example .env
+# Éditer .env avec vos paramètres
+docker compose up -d --build
+```
+
+2. **Développement frontend**
 ```bash
 docker compose exec wordpress bash
+cd wp-content/themes/[THEME_NAME]
+npm run dev  # Lance watch + BrowserSync
 ```
-Cela vous ouvrira un shell Bash à l'intérieur du conteneur. Le répertoire de travail par défaut est `/var/www/html`.
 
-### Utilisation de WP-CLI
+3. **Accéder aux interfaces**
+- Site WordPress : `http://localhost:8080`
+- BrowserSync : `http://localhost:3000`
+- Admin WordPress : `http://localhost:8080/wp-admin`
 
-WP-CLI est installé et accessible globalement comme `wp`. Toutes les commandes WP-CLI doivent être exécutées avec l'option `--allow-root` car le serveur web tourne en tant que root dans ce conteneur.
+### **Workflow Quotidien**
 
-Exemples (depuis l'intérieur du conteneur, ou préfixé par `docker compose exec wordpress`) :
-
-*   Lister les plugins : `wp plugin list --allow-root`
-*   Installer un plugin : `wp plugin install jetpack --activate --allow-root`
-*   Vider le cache (si un plugin de cache est utilisé) : `wp cache flush --allow-root`
-*   Accéder à la base de données : `wp db cli --allow-root`
-
-### Gestion des dépendances PHP avec Composer
-
-Composer est installé globalement. Votre thème enfant a son propre `composer.json` et ses dépendances dans son dossier `vendor/`.
-
-Pour gérer les dépendances de votre thème enfant :
-
-1.  Accédez au conteneur : `docker compose exec wordpress bash`
-2.  Naviguez vers le dossier de votre thème enfant :
-    ```bash
-    cd wp-content/themes/${CUSTOM_THEME_NAME:-starter} 
-    ```
-    (Remplacez `${CUSTOM_THEME_NAME:-starter}` par le slug réel de votre thème si vous n'êtes pas sûr ou si la variable n'est pas disponible dans ce shell).
-3.  Utilisez Composer :
-    *   Ajouter une dépendance : `composer require mon-paquet/super-librairie`
-    *   Mettre à jour les dépendances : `composer update`
-    *   Installer les dépendances (si `vendor/` est manquant) : `composer install`
-
-### Développement Frontend (Tailwind CSS & Terser)
-
-Le thème enfant est configuré avec Tailwind CSS v4 et Terser.
-
-1.  **Accédez au conteneur** : `docker compose exec wordpress bash`
-2.  **Naviguez vers le dossier de votre thème enfant** :
-    ```bash
-    cd wp-content/themes/${CUSTOM_THEME_NAME:-starter}
-    ```
-3.  **Scripts NPM disponibles** (définis dans `package.json` du thème enfant) :
-    *   **Mode développement (watch)** :
-        ```bash
-        npm run dev
-        ```
-        Cette commande surveille les modifications dans `tailwind-input.css` et vos fichiers de templates (`*.php`, `views/**/*.twig`, `assets/js/**/*.js`) et recompile `assets/css/tailwind.css` automatiquement.
-    *   **Mode production (build)** :
-        ```bash
-        npm run build
-        ```
-        Cette commande compile et minifie `assets/css/tailwind.css` et minifie `assets/js/scripts.js` vers `assets/js/scripts.min.js`. Le script `custom-entrypoint.sh` exécute cette commande une fois lors de la création initiale du thème.
-
-4.  **Fichiers clés pour le frontend** :
-    *   `tailwind-input.css`: Fichier principal pour vos directives Tailwind, `@import "tailwindcss";`, et vos styles personnalisés `@layer base`, `@layer components`, `@layer utilities`.
-    *   `tailwind.config.js`: (Optionnel, à créer si besoin de personnalisation avancée de Tailwind). Le script d'initialisation ne crée pas ce fichier par défaut, mais Tailwind v4 le prendra en compte s'il existe.
-    *   `assets/js/scripts.js`: Votre fichier JavaScript principal.
-    *   `assets/css/tailwind.css`: Fichier CSS généré par Tailwind (ne pas modifier directement).
-    *   `assets/js/scripts.min.js`: Fichier JavaScript minifié (ne pas modifier directement).
-
-    Assurez-vous que `functions.php` de votre thème enfant enqueue correctement `assets/css/tailwind.css` et `assets/js/scripts.min.js` (ou `scripts.js` en développement). Le `functions.php` généré par le script d'initialisation le fait déjà.
-
-### Logs des Services Docker
-
-Pour voir les logs d'un service spécifique (par exemple, `wordpress` ou `db`) :
 ```bash
-docker compose logs wordpress
-docker compose logs -f wordpress # Pour suivre les logs en temps réel
+# Démarrer la journée
+docker compose up -d
+docker compose exec wordpress bash
+cd wp-content/themes/[THEME_NAME]
+npm run dev
+
+# Développer dans votre éditeur favori
+# Les changements CSS/JS sont automatiquement recompilés
+# BrowserSync recharge automatiquement le navigateur
+
+# Arrêter en fin de journée
+# Ctrl+C pour arrêter npm run dev
+docker compose down
 ```
 
-## Structure du Thème Enfant et Personnalisation
+### **Déploiement en Production**
 
-Le thème enfant est généré dans `wp-content/themes/[CUSTOM_THEME_NAME]/`.
+```bash
+# Build de production
+cd wp-content/themes/[THEME_NAME]
+npm run build
 
-*   **`style.css`**: Contient les informations de base du thème (Nom, Template, etc.).
-*   **`functions.php`**:
-    *   Enqueue les styles du thème parent (`timber-starter-theme`).
-    *   Enqueue `tailwind.css` (compilé).
-    *   Enqueue `scripts.min.js` (compilé et minifié).
-    *   C'est ici que vous ajouterez la logique PHP de votre thème, les hooks, la configuration de Timber, etc.
-*   **`views/`**: Ce dossier (à créer par vos soins) contiendra vos templates Twig utilisés par Timber. Par exemple : `views/base.twig`, `views/index.twig`, `views/single.twig`, etc.
-*   **`tailwind-input.css`**: Modifiez ce fichier pour ajouter vos styles Tailwind ou des CSS personnalisés.
-*   **`assets/js/scripts.js`**: Écrivez votre JavaScript ici.
+# Vérifier les assets optimisés
+ls -la dist/
 
-## Configuration de l'envoi d'e-mails (msmtp)
+# Les assets minifiés sont automatiquement utilisés
+# quand WORDPRESS_ENV=production
+```
 
-Le conteneur WordPress est configuré pour utiliser `msmtp` pour envoyer des e-mails via un serveur SMTP externe. Ceci est utile pour tester les fonctionnalités d'e-mail de WordPress (notifications, formulaires de contact) en développement.
+## 🤝 Contribuer
 
-Configurez les variables `MSMTP_*` dans votre fichier `.env`. Mailtrap.io est un excellent service pour cela en développement, car il capture tous les e-mails envoyés sans les délivrer réellement.
+Les suggestions et contributions sont les bienvenues ! 
 
-Le fichier de configuration `/etc/msmtprc` est généré dynamiquement au démarrage du conteneur à partir de ces variables.
+### **Comment Contribuer**
+1. Forkez le projet
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Poussez vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
 
-## Dépannage
+### **Signaler des Bugs**
+Utilisez les [Issues GitHub](https://github.com/votre-repo/issues) en incluant :
+- Version de Docker/Docker Compose
+- OS utilisé
+- Configuration `.env` (sans mots de passe)
+- Logs d'erreur complets
 
-*   **Problèmes de permission sur `wp-content`** : Assurez-vous que les permissions du dossier `wp-content` sur votre machine hôte permettent à Docker d'écrire dedans.
-*   **Le site ne se charge pas** : Vérifiez les logs Docker (`docker compose logs wordpress` et `docker compose logs db`). Assurez-vous que `WORDPRESS_URL` et `WORDPRESS_HOST_PORT` sont correctement configurés.
-*   **Erreurs WP-CLI** : N'oubliez pas `--allow-root`.
-*   **Problèmes avec `npm` ou `composer` dans le conteneur** : Assurez-vous que Node.js et Composer sont correctement installés dans le Dockerfile et que les chemins sont corrects. Le `Dockerfile` fourni s'en charge.
-*   **"MySQL is unavailable"** : Le script `custom-entrypoint.sh` attend MySQL, mais si des problèmes persistent, vérifiez les logs du conteneur `db`.
-*   **Changements dans `tailwind-input.css` non reflétés** : Assurez-vous que `npm run dev` est en cours d'exécution dans le conteneur du thème enfant, ou exécutez `npm run build` manuellement. Vérifiez également que votre navigateur ne met pas en cache l'ancien CSS.
-
-## Commandes Utiles Docker Compose
-
-*   Démarrer les services en arrière-plan : `docker compose up -d`
-*   Arrêter les services : `docker compose down`
-*   Arrêter et supprimer les volumes (attention, supprime la base de données !) : `docker compose down -v`
-*   Voir les logs : `docker compose logs <nom-du-service>`
-*   Reconstruire les images : `docker compose build` ou `docker compose up -d --build`
-*   Lister les conteneurs en cours : `docker compose ps`
-
-## Contribuer
-
-Les suggestions et contributions sont les bienvenues. Veuillez ouvrir une issue ou une pull request.
-
-## Licence
+## 📝 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-Le concept de base de ce starter WordPress a été initialement développé par Lugh Web (https://lugh-web.fr).
+## 👏 Crédits
+
+- **Concept initial** : [Lugh Web](https://lugh-web.fr)
+- **Timber** : [Timber Library](https://timber.github.io/docs/)
+- **Tailwind CSS** : [Tailwind CSS](https://tailwindcss.com/)
+- **WordPress** : [WordPress.org](https://wordpress.org/)
+
+---
+
+**📖 Documentation Complète** | **🐛 Signaler un Bug** | **💡 Demander une Fonctionnalité**
+
+*Développé avec ❤️ pour la communauté WordPress*

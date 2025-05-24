@@ -1,4 +1,3 @@
-# Utiliser l'image WordPress officielle comme base
 FROM wordpress:php8.3-apache
 
 USER root
@@ -33,6 +32,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && nvm install $NODE_VERSION \
   && nvm use $NODE_VERSION \
   && nvm alias default $NODE_VERSION \
+  && ln -sf $NVM_DIR/versions/node/v$NODE_VERSION/bin/node /usr/local/bin/node \
+  && ln -sf $NVM_DIR/versions/node/v$NODE_VERSION/bin/npm /usr/local/bin/npm \
+  && ln -sf $NVM_DIR/versions/node/v$NODE_VERSION/bin/npx /usr/local/bin/npx \
   && mkdir -p /usr/local/etc/php/conf.d \
   && printf "[PHP]\\nsendmail_path = /usr/bin/msmtp -t -i\\nupload_max_filesize = 500M\\npost_max_size = 500M\\nmemory_limit = 256M\\n" > /usr/local/etc/php/conf.d/zz-custom-php-settings.ini \
   && echo "DEBUG Dockerfile: Checking for mysqladmin after custom installations and before cleanup" && \
@@ -47,5 +49,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
+# Copie des scripts modulaires
+COPY scripts/ /usr/local/bin/scripts/
 COPY custom-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
 RUN chmod +x /usr/local/bin/custom-entrypoint.sh
+RUN chmod +x /usr/local/bin/scripts/*.sh

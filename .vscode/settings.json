@@ -112,5 +112,6 @@
         // Si vous aviez wp-admin et wp-includes localement :
         // "**/wp-admin": true,
         // "**/wp-includes": true
-    }
+    },
+    "git.ignoreLimitWarning": true
 }
