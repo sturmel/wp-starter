@@ -1030,55 +1030,6 @@ docker compose exec wordpress wp db import backup-YYYYMMDD.sql --allow-root
 tar -xzf wp-content-backup-YYYYMMDD.tar.gz
 ```
 
-## 🌍 Déploiement en Production
-
-### **Variables d'Environnement Production**
-
-**.env pour la production**
-```bash
-# Environnement
-WORDPRESS_ENV=production
-
-# Sécurité
-WORDPRESS_DB_PASSWORD=motdepassefort123!
-MYSQL_ROOT_PASSWORD=rootpasswordfort456!
-
-# Performance
-WP_CACHE=true
-WP_DEBUG=false
-WP_DEBUG_LOG=false
-WP_DEBUG_DISPLAY=false
-
-# SSL
-FORCE_SSL_ADMIN=true
-```
-
-### **Configuration Docker Production**
-
-**docker-compose.prod.yml recommandé**
-```yaml
-version: '3.8'
-services:
-  wordpress:
-    restart: unless-stopped
-    environment:
-      - WORDPRESS_ENV=production
-    volumes:
-      - ./wp-content:/var/www/html/wp-content
-      - /path/to/ssl:/etc/ssl/certs
-  
-  db:
-    restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./backups:/backups
-
-volumes:
-  db_data:
-```
-
 ### **Checklist de Déploiement**
 
 - [ ] Variables d'environnement sécurisées
