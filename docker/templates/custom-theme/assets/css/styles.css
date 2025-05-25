@@ -1,0 +1,18 @@
+/* Import Tailwind's base, components, and utilities for v4 */
+@import "tailwindcss";
+
+/* Explicitly define content paths here for Tailwind v4 */
+@content '../../views/**/*.twig';
+@content '../../*.php';
+@content '../js/**/*.js';
+
+/* Custom base styles */
+@layer base{};
+
+/* Custom component styles */
+@layer components{};
+
+@layer utilities{};
+
+/* Custom theme variables for Tailwind v4 */
+@theme{};

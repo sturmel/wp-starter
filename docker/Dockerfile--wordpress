@@ -49,8 +49,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# Copie des scripts modulaires
+# Copie des scripts modulaires et templates
 COPY scripts/ /usr/local/bin/scripts/
+COPY templates/ /usr/local/bin/templates/
 COPY custom-entrypoint.sh /usr/local/bin/custom-entrypoint.sh
 RUN chmod +x /usr/local/bin/custom-entrypoint.sh
 RUN chmod +x /usr/local/bin/scripts/*.sh
