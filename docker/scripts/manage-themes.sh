@@ -57,13 +57,13 @@ if [ "$CURRENT_ENV" = "development" ]; then
             echo "[ManageThemes] Creating child theme ${CUSTOM_THEME_SLUG} for parent ${STARTER_THEME_SLUG}..."
             mkdir -p "${CUSTOM_THEME_PATH}"
 
-            # Create style.css
-            echo "[ManageThemes] Creating style.css for ${CUSTOM_THEME_SLUG}..."
+            # Create styles.css
+            echo "[ManageThemes] Creating styles.css for ${CUSTOM_THEME_SLUG}..."
             cat << EOF_STYLE > "${CUSTOM_THEME_PATH}/style.css"
 /*
  * Theme Name: ${CUSTOM_THEME_SLUG}
  * Template: ${STARTER_THEME_SLUG}
- * Description: Child theme built upon the Timber starter theme, leveraging the Twig templating engine for enhanced separation of concerns and cleaner code. It integrates Advanced Custom Fields (ACF) for flexible content management and utilizes Tailwind CSS for a utility-first styling approach. The development workflow is powered by npm for frontend package management and webpack for modern build processing. It includes GSAP for animations, Terser for JavaScript minification, and BrowserSync for live development, ensuring optimized performance and maintainability. This setup promotes a modern, efficient, and scalable WordPress development experience.
+ * Description: Thème enfant moderne basé sur Timber avec architecture Webpack 5 complète. Intègre Tailwind CSS v4 pour un styling utility-first, JavaScript ES6+ avec Babel, et GSAP pour les animations. Système de build intelligent avec modes développement/production, BrowserSync pour le live reload, et optimisations automatiques. Inclut des fonctionnalités de performance et sécurité avancées, séparation logique avec Twig, et workflow de développement optimisé avec hot reload et cache busting automatique.
  * Version: 1.0
  * Author: Lugh Web
  * Author URI: https://lugh-web.fr
@@ -207,10 +207,18 @@ function theme_enqueue_styles_scripts()
 
     if ($wordpress_env === 'development') {
         $css_file_name_relative = '/dev_build/styles.css';
-        $js_file_name_relative = '/dev_build/main.js';
+        $js_file_name_relative = '/dev_build/scripts.js';
+
+        if (!file_exists(get_stylesheet_directory() . $css_file_name_relative)) {
+            $css_file_name_relative = '/assets/css/styles.css';
+        }
+
+        if (!file_exists(get_stylesheet_directory() . $js_file_name_relative)) {
+            $js_file_name_relative = '/assets/js/scripts.js';
+        }
     } else {
         $css_file_name_relative = '/dist/styles.min.css';
-        $js_file_name_relative = '/dist/main.min.js';
+        $js_file_name_relative = '/dist/scripts.min.js';
     }
 
     $theme_css_path = get_stylesheet_directory() . $css_file_name_relative;
@@ -233,15 +241,6 @@ function theme_enqueue_styles_scripts()
             true
         );
     }
-}
-
-add_filter('script_loader_tag', 'add_type_attribute_to_script', 10, 3);
-function add_type_attribute_to_script($tag, $handle, $src)
-{
-    if ('child-scripts' === $handle) {
-        $tag = '<script type="module" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
-    }
-    return $tag;
 }
 
 function hide_editor()
@@ -283,6 +282,7 @@ add_filter('timber/context', function ($context) {
 
     return $context;
 });
+
 EOF_FUNCTIONS
 
             echo "[ManageThemes] Creating .gitignore for ${CUSTOM_THEME_SLUG}..."
@@ -349,6 +349,7 @@ EOF_GITIGNORE
     "browser-sync-webpack-plugin": "^2.3.0",
     "concurrently": "^9.1.2",
     "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.2",
     "mini-css-extract-plugin": "^2.9.2",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
@@ -367,16 +368,10 @@ EOF_GITIGNORE
 EOF_PACKAGE
 
                 echo "[ManageThemes] Installing npm dependencies..."
-                echo "[ManageThemes] Current working directory: $(pwd)"
-                echo "[ManageThemes] Listing files in current directory:"
-                ls -la
                 echo "[ManageThemes] Node.js version: $(node --version)"
                 echo "[ManageThemes] npm version: $(npm --version)"
-                echo "[ManageThemes] npm config list:"
-                npm config list
-                echo "[ManageThemes] Starting npm install with verbose logging..."
                 
-                if npm install --verbose 2>&1 | tee npm-install.log; then
+                if npm install 2>&1 | tee npm-install.log; then
                     echo "[ManageThemes] npm dependencies installed successfully."
                     rm -f npm-install.log
                 else
@@ -390,7 +385,6 @@ EOF_PACKAGE
                     echo "Current user: $(whoami)"
                     echo "Current user ID: $(id)"
                     echo "[ManageThemes] Attempting to continue without dependencies..."
-                    # Don't exit here, just log the error and continue
                 fi
 
                 echo "[ManageThemes] Creating browsersync.config.js for ${CUSTOM_THEME_SLUG}..."
@@ -412,37 +406,37 @@ module.exports = {
 EOF_BROWSERSYNC_CONFIG
 
                 echo "[ManageThemes] Creating webpack.config.js for ${CUSTOM_THEME_SLUG}..."
-                cat << 'EOF_WEBPACK_CONFIG' > ./webpack.config.js
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+                cat << EOF_WEBPACK_CONFIG > ./webpack.config.js
+const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 
 module.exports = (env, argv) => {
-  const isProduction = argv.mode === 'production';
-  const outputPath = isProduction ? 'dist' : 'dev_build';
+  const isProduction = argv.mode === "production";
+  const outputPath = isProduction ? "dist" : "dev_build";
 
   return {
     entry: {
-      main: './assets/js/scripts.js',
-      styles: './assets/css/main.css'
+      scripts: "./assets/js/scripts.js"
     },
     output: {
       path: path.resolve(__dirname, outputPath),
-      filename: isProduction ? '[name].min.js' : '[name].js',
+      filename: isProduction ? "[name].min.js" : "[name].js",
       clean: true,
     },
-    mode: isProduction ? 'production' : 'development',
-    devtool: isProduction ? false : 'source-map',
+    mode: isProduction ? "production" : "development",
+    devtool: isProduction ? false : "source-map",
     module: {
       rules: [
         {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: ['@babel/preset-env']
+              presets: ["@babel/preset-env"]
             }
           }
         },
@@ -450,15 +444,15 @@ module.exports = (env, argv) => {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            "css-loader",
             {
-              loader: 'postcss-loader',
+              loader: "postcss-loader",
               options: {
                 postcssOptions: {
                   plugins: [
-                    require('postcss-import'),
-                    require('@tailwindcss/postcss'),
-                    require('autoprefixer'),
+                    require("postcss-import"),
+                    require("@tailwindcss/postcss"),
+                    require("autoprefixer"),
                   ],
                 },
               },
@@ -469,16 +463,16 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        filename: isProduction ? '[name].min.css' : '[name].css',
+        filename: isProduction ? "styles.min.css" : "styles.css",
       }),
-      ...(argv.mode === 'development' ? [
+      ...(argv.mode === "development" ? [
         new BrowserSyncPlugin({
-          proxy: 'localhost:8080',
+          proxy: "localhost:8080",
           files: [
-            '**/*.php',
-            '**/*.twig',
-            outputPath + '/**/*.css',
-            outputPath + '/**/*.js'
+            "**/*.php",
+            "**/*.twig",
+            outputPath + "/**/*.css",
+            outputPath + "/**/*.js"
           ],
           port: 3000,
           notify: false,
@@ -496,9 +490,19 @@ module.exports = (env, argv) => {
             mangle: true,
           },
         }),
+        new CssMinimizerPlugin({
+          minimizerOptions: {
+            preset: [
+              "default",
+              {
+                discardComments: { removeAll: true },
+              },
+            ],
+          },
+        }),
       ] : [],
     },
-    watch: argv.mode === 'development',
+    watch: argv.mode === "development",
     watchOptions: {
       aggregateTimeout: 300,
       poll: 1000,
@@ -506,6 +510,8 @@ module.exports = (env, argv) => {
     },
   };
 };
+
+
 EOF_WEBPACK_CONFIG
 
                 echo "[ManageThemes] Creating postcss.config.js for ${CUSTOM_THEME_SLUG}..."
@@ -521,7 +527,7 @@ EOF_POSTCSS_CONFIG
 
                 echo "[ManageThemes] Creating Tailwind CSS v4 input file..."
                 mkdir -p ./assets/css
-                cat << 'EOF_TAILWIND_INPUT_CSS' > ./assets/css/main.css
+                cat << 'EOF_TAILWIND_INPUT_CSS' > ./assets/css/styles.css
 /* Import Tailwind's base, components, and utilities for v4 */
 @import "tailwindcss";
 
@@ -531,21 +537,22 @@ EOF_POSTCSS_CONFIG
 @content '../js/**/*.js';
 
 /* Custom base styles */
-@layer base {}
+@layer base{};
 
 /* Custom component styles */
-@layer components {}
+@layer components{};
 
-@layer utilities {}
+@layer utilities{};
 
 /* Custom theme variables for Tailwind v4 */
-@theme {}
+@theme{};
 EOF_TAILWIND_INPUT_CSS
 
                 echo "[ManageThemes] Creating JavaScript directory and initial script file..."
                 mkdir -p ./assets/js
                 cat << 'EOF_SCRIPTS_JS' > ./assets/js/scripts.js
 import { gsap } from 'gsap';
+import '../css/styles.css';
 
 addEventListener('DOMContentLoaded', function() {
    console.log('🔧 Webpack entry file loaded');

@@ -1,6 +1,6 @@
-# WordPress Starter Kit avec Docker, Timber, Webpack, Tailwind CSS v4 et Outils Modernes
+# WordPress Starter Kit avec Docker, Timber, Webpack, Tailwind CSS v4, GSAP et Outils Modernes
 
-Ce projet est un kit de démarrage professionnel pour développer des sites WordPress modernes et performants en utilisant Docker. Il fournit un environnement de développement local complet, préconfiguré avec WordPress, MySQL, Redis, WP-CLI, Composer, Node.js (via NVM), et une chaîne de build moderne basée sur **Webpack 5**. Le projet met en place automatiquement un thème enfant basé sur `timber-starter-theme` avec une architecture frontend moderne incluant Tailwind CSS v4, BrowserSync, et des outils d'optimisation avancés.
+Ce projet est un kit de démarrage professionnel pour développer des sites WordPress modernes et performants en utilisant Docker. Il fournit un environnement de développement local complet, préconfiguré avec WordPress, MySQL, Redis, WP-CLI, Composer, Node.js (via NVM), et une chaîne de build moderne basée sur **Webpack 5**. Le projet met en place automatiquement un thème enfant basé sur `timber-starter-theme` avec une architecture frontend moderne incluant Tailwind CSS v4, GSAP, BrowserSync, et des outils d'optimisation avancés.
 
 ## 🚀 Fonctionnalités Principales
 
@@ -140,15 +140,17 @@ Ce projet est un kit de démarrage professionnel pour développer des sites Word
 
 6.  **Démarrer le développement frontend** :
     ```bash
-    # Accéder au conteneur
-    docker compose exec wordpress bash
-    
-    # Naviguer vers votre thème
+    # Pour l'instant, naviguer vers votre thème directement sur votre machine hôte
     cd wp-content/themes/[VOTRE_THEME_NAME]
+    
+    # Installer les dépendances npm si nécessaire
+    npm install
     
     # Lancer le mode développement avec watch + BrowserSync
     npm run dev
     ```
+    
+    > **Note** : Pour l'instant, il est recommandé de lancer les commandes npm directement sur votre machine hôte plutôt que dans le conteneur Docker. Assurez-vous d'avoir Node.js installé localement.
 
 ## 📁 Structure du Projet
 

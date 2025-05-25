@@ -2,6 +2,12 @@
 
 echo "[SetupWordPressCore] Setting up WordPress core..."
 
+# Remove object-cache.php if it exists to prevent Redis connection issues during setup
+if [ -f "${WP_CONTENT_PATH}/object-cache.php" ]; then
+    echo "[SetupWordPressCore] Removing existing object-cache.php to prevent Redis connection issues during setup..."
+    rm -f "${WP_CONTENT_PATH}/object-cache.php"
+fi
+
 # Copy WordPress core files if not present
 if [ ! -e "${WP_PATH}/index.php" ] || [ ! -e "${WP_PATH}/wp-includes/version.php" ]; then
     echo "[SetupWordPressCore] WordPress core files not found in ${WP_PATH}. Copying from /usr/src/wordpress..."

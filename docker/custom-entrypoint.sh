@@ -36,11 +36,11 @@ echo "[CustomScript] Proceeding with Composer, Timber theme, and plugin installa
 
 source /usr/local/bin/scripts/configure-msmtp.sh
 
-source /usr/local/bin/scripts/configure-redis.sh
-
 source /usr/local/bin/scripts/manage-themes.sh
 
 source /usr/local/bin/scripts/manage-plugins.sh
+
+source /usr/local/bin/scripts/configure-redis.sh
 
 source /usr/local/bin/scripts/finalize-config.sh
 

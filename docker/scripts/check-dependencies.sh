@@ -23,6 +23,18 @@ until mysqladmin ping -h"db" -u"${WORDPRESS_DB_USER}" -p"${WORDPRESS_DB_PASSWORD
 done
 echo "[CheckDependencies] MySQL is up - continuing..."
 
+# Wait for Redis to be ready
+if [ -n "${WORDPRESS_REDIS_HOST:-}" ]; then
+    echo "[CheckDependencies] Waiting for Redis to be ready..."
+    until timeout 5 bash -c "echo > /dev/tcp/${WORDPRESS_REDIS_HOST}/${WORDPRESS_REDIS_PORT:-6379}"; do
+        echo "[CheckDependencies] Redis is unavailable - sleeping"
+        sleep 2
+    done
+    echo "[CheckDependencies] Redis is up - continuing..."
+else
+    echo "[CheckDependencies] Redis configuration not set, skipping Redis check."
+fi
+
 # Check for required tools
 REQUIRED_TOOLS=("wp" "composer" "node" "npm")
 for tool in "${REQUIRED_TOOLS[@]}"; do
