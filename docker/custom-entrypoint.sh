@@ -30,6 +30,7 @@ source /usr/local/bin/scripts/init-variables.sh
 
 source /usr/local/bin/scripts/check-dependencies.sh
 
+# Configure WordPress core with environment-specific settings
 source /usr/local/bin/scripts/setup-wordpress-core.sh
 
 echo "[CustomScript] Proceeding with Composer, Timber theme, and plugin installations... (Tools like git, unzip, msmtp, composer, node should be pre-installed from Dockerfile)"

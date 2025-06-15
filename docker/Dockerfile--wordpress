@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     gzip \
     libtool \
+    default-mysql-client \
+    netcat-traditional \
   && pecl install redis \
   && docker-php-ext-enable redis \
   && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
@@ -37,15 +39,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && ln -sf $NVM_DIR/versions/node/v$NODE_VERSION/bin/npx /usr/local/bin/npx \
   && mkdir -p /usr/local/etc/php/conf.d \
   && printf "[PHP]\\nsendmail_path = /usr/bin/msmtp -t -i\\nupload_max_filesize = 500M\\npost_max_size = 500M\\nmemory_limit = 256M\\n" > /usr/local/etc/php/conf.d/zz-custom-php-settings.ini \
-  && echo "DEBUG Dockerfile: Checking for mysqladmin after custom installations and before cleanup" && \
-     (which mysqladmin && echo "DEBUG Dockerfile: mysqladmin found at $(which mysqladmin)" || echo "DEBUG Dockerfile: mysqladmin NOT found before cleanup") && \
-     echo "DEBUG Dockerfile: PATH is $PATH" && \
+  && echo "DEBUG Dockerfile: Checking for mysql after installations" && \
+     (which mysql && echo "DEBUG Dockerfile: mysql found at $(which mysql)" || echo "DEBUG Dockerfile: mysql NOT found") && \
+     (which nc && echo "DEBUG Dockerfile: netcat found at $(which nc)" || echo "DEBUG Dockerfile: netcat NOT found") && \
   apt-get autoremove -y --purge \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && echo "DEBUG Dockerfile: Checking for mysqladmin after cleanup" && \
-     (which mysqladmin && echo "DEBUG Dockerfile: mysqladmin found at $(which mysqladmin)" || echo "DEBUG Dockerfile: mysqladmin NOT found after cleanup") && \
-     echo "DEBUG Dockerfile: PATH is $PATH"
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 

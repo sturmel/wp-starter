@@ -8,10 +8,14 @@ PLUGINS_TO_INSTALL=(
   "wordpress-seo"
   "litespeed-cache"
   "contact-form-7"
+  "wordfence"
+  "complianz-gdpr"
 )
 
 if [ "$CURRENT_ENV" = "development" ]; then
     echo "[ManagePlugins] In development mode, ensuring plugins are installed and active."
+    
+    # Install free plugins
     for plugin_slug in "${PLUGINS_TO_INSTALL[@]}"; do
       if ! wp plugin is-installed "$plugin_slug" --path="$WP_PATH" --allow-root --quiet; then
         echo "[ManagePlugins] Installing plugin $plugin_slug..."

@@ -88,6 +88,7 @@ Le système génère automatiquement un **thème enfant intelligent** basé sur 
     *   Suppression des en-têtes WordPress sensibles
     *   Protection contre l'édition de fichiers en production
     *   Désactivation XML-RPC et autres vecteurs d'attaque
+    *   Plugins de sécurité préinstallés : Wordfence, Complianz GDPR
 *   **Communication Email** :
     *   msmtp pour l'envoi d'e-mails via SMTP externe
     *   Configuration Mailtrap recommandée pour le développement
@@ -96,7 +97,7 @@ Le système génère automatiquement un **thème enfant intelligent** basé sur 
 ### **🌍 Gestion d'Environnements Intelligente**
 *   **Mode Développement** (`WORDPRESS_ENV=development`) :
     *   Modifications de fichiers autorisées
-    *   Erreurs PHP affichées pour debugging
+    *   Contrôle avancé des avertissements PHP via `WORDPRESS_SHOW_WARNINGS`
     *   Assets non minifiés avec source maps détaillées
     *   BrowserSync activé avec hot reload
     *   Plugins de développement activés
@@ -105,6 +106,12 @@ Le système génère automatiquement un **thème enfant intelligent** basé sur 
     *   Assets minifiés et optimisés pour la performance
     *   Sécurité renforcée avec headers sécurisés
     *   Performance maximisée avec cache agressif
+
+### **🎯 Configuration VS Code Intégrée**
+*   **Support Tailwind CSS v4** : IntelliSense complet avec autocomplétion
+*   **Extensions Recommandées** : PHP IntelliSense, Twig, Tailwind CSS
+*   **Configuration Optimisée** : Exclusions intelligentes pour de meilleures performances
+*   **Reconnaissance des Fichiers** : Support automatique des templates Twig et PHP
 
 ## 📋 Prérequis
 
@@ -318,6 +325,9 @@ Configurez ces variables dans votre fichier `.env` :
 *   `WORDPRESS_ENV` : 
     *   `development` : Mode développement avec BrowserSync, assets non minifiés, erreurs affichées
     *   `production` : Mode production avec assets optimisés, sécurité renforcée
+*   `WORDPRESS_SHOW_WARNINGS` : 
+    *   `true` : Affiche les avertissements PHP pour le débogage
+    *   `false` : Masque les avertissements pour une interface propre (recommandé)
 
 ### **Configuration Docker**
 *   `WORDPRESS_HOST_PORT` : Port sur la machine hôte (ex: `8080`)
@@ -889,11 +899,20 @@ docker compose logs wordpress
 
 **Base de données non accessible**
 ```bash
+# Le projet utilise maintenant netcat pour une vérification robuste de la connectivité
+# Vérification automatique dans les scripts d'initialisation
+
+# Tester manuellement la connexion
+docker compose exec wordpress nc -z db 3306
+
 # Tester la connexion à MySQL
 docker compose exec db mysql -u $WORDPRESS_DB_USER -p$WORDPRESS_DB_PASSWORD
 
 # Vérifier les variables d'environnement
 docker compose exec wordpress env | grep WORDPRESS_DB
+
+# Diagnostic avancé de connectivité WordPress
+docker compose exec wordpress wp db check --allow-root
 ```
 
 **Emails ne fonctionnent pas**
@@ -965,9 +984,6 @@ docker compose exec wordpress wp redis flush --allow-root
 docker stats
 
 # Analyser les temps de réponse
-docker compose exec wordpress curl -w "@curl-format.txt" -o /dev/null -s http://localhost/
-
-# Tester la vitesse de base de données
 docker compose exec wordpress wp db check --allow-root
 ```
 

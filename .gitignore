@@ -17,3 +17,6 @@ wp-content/themes/*/node_modules/
 wp-content/themes/*/package-lock.json
 wp-content/themes/*/dist/
 wp-content/themes/*/dev_build/
+
+# Wordfence logs
+wp-content/wflogs/

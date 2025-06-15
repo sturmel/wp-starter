@@ -101,6 +101,66 @@
         "editor.formatOnSave": true // Formate automatiquement à la sauvegarde
     },
   
+    // Section: Configuration Tailwind CSS v4
+    // Configuration spécifique pour Tailwind CSS v4 avec autocomplétion dans les thèmes WordPress
+    "tailwindCSS.experimental.configFile": ".vscode/tailwind.config.js",
+    "tailwindCSS.includeLanguages": {
+        "twig": "html",
+        "php": "html"
+    },
+    "tailwindCSS.files.exclude": [
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/vendor/**",
+        "**/wp-admin/**",
+        "**/wp-includes/**",
+        "**/wp-content/uploads/**",
+        "**/wp-content/cache/**"
+    ],
+    "tailwindCSS.classAttributes": [
+        "class",
+        "className",
+        "classList",
+        "ngClass"
+    ],
+    "tailwindCSS.experimental.classRegex": [
+        ["class(?:Name)?\\s*[=:]\\s*[\"']([^\"']*)[\"']", "([^\\s\"']+)"],
+        ["class\\s*=\\s*[\"']([^\"']*)[\"']", "([^\\s\"']+)"]
+    ],
+    // Support pour Tailwind v4 avec CSS @theme syntax
+    "tailwindCSS.files.references": [
+        "**/assets/css/styles.css"
+    ],
+    // Configuration des chemins CSS pour Tailwind v4
+    "css.validate": false,
+    "less.validate": false,
+    "scss.validate": false,
+    
+    // Configuration pour l'association des fichiers
+    "files.associations": {
+        "*.twig": "twig",
+        "*.php": "php"
+    },
+    
+    // Configuration pour Emmet dans les fichiers Twig
+    "emmet.includeLanguages": {
+        "twig": "html",
+        "php": "html"
+    },
+    
+    // Configuration spécifique pour les workspace avec plusieurs thèmes
+    "tailwindCSS.rootFontSize": 16,
+    "tailwindCSS.hovers": true,
+    "tailwindCSS.suggestions": true,
+    "tailwindCSS.validate": true,
+    "tailwindCSS.lint.cssConflict": "warning",
+    "tailwindCSS.lint.invalidApply": "error",
+    "tailwindCSS.lint.invalidScreen": "error",
+    "tailwindCSS.lint.invalidVariant": "error",
+    "tailwindCSS.lint.invalidConfigPath": "error",
+    "tailwindCSS.lint.invalidTailwindDirective": "error",
+    "tailwindCSS.lint.recommendedVariantOrder": "warning",
+
     // Section: Recherche
     // Exclut certains dossiers des résultats de recherche pour les rendre plus pertinents.
     "search.exclude": {
@@ -112,6 +172,5 @@
         // Si vous aviez wp-admin et wp-includes localement :
         // "**/wp-admin": true,
         // "**/wp-includes": true
-    },
-    "git.ignoreLimitWarning": true
+    }
 }

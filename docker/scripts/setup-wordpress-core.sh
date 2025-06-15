@@ -1,76 +1,226 @@
 #!/bin/bash
 
-echo "[SetupWordPressCore] Setting up WordPress core..."
+echo "[WordPress Core] Setting up WordPress core configuration..."
 
-# Remove object-cache.php if it exists to prevent Redis connection issues during setup
-if [ -f "${WP_CONTENT_PATH}/object-cache.php" ]; then
-    echo "[SetupWordPressCore] Removing existing object-cache.php to prevent Redis connection issues during setup..."
-    rm -f "${WP_CONTENT_PATH}/object-cache.php"
+# Remove object-cache.php if it exists to avoid conflicts on restart
+if [ -f /var/www/html/wp-content/object-cache.php ]; then
+    echo "[WordPress Core] Removing existing object-cache.php..."
+    rm -f /var/www/html/wp-content/object-cache.php
+    echo "[WordPress Core] object-cache.php removed successfully"
 fi
 
-# Copy WordPress core files if not present
-if [ ! -e "${WP_PATH}/index.php" ] || [ ! -e "${WP_PATH}/wp-includes/version.php" ]; then
-    echo "[SetupWordPressCore] WordPress core files not found in ${WP_PATH}. Copying from /usr/src/wordpress..."
-    if [ -d "/usr/src/wordpress" ]; then
-        (cd /usr/src/wordpress && tar cf - . | tar xf - -C "$WP_PATH")
-        echo "[SetupWordPressCore] WordPress core files copied."
-    else
-        echo "[SetupWordPressCore ERROR] /usr/src/wordpress not found. Cannot copy core files."
-        exit 1
+# Extract host and port from WORDPRESS_DB_HOST
+DB_HOST=$(echo $WORDPRESS_DB_HOST | cut -d: -f1)
+DB_PORT=$(echo $WORDPRESS_DB_HOST | cut -d: -s -f2)
+DB_PORT=${DB_PORT:-3306}
+
+# Wait for database to be ready using netcat
+echo "[WordPress Core] Waiting for database to be ready at $DB_HOST:$DB_PORT..."
+until nc -z "$DB_HOST" "$DB_PORT"; do
+    echo "[WordPress Core] Database not ready, waiting 3 seconds..."
+    sleep 3
+done
+
+echo "[WordPress Core] Database is ready!"
+
+# Wait a bit more to ensure MySQL is fully ready
+sleep 2
+
+# Check if WordPress is downloaded, if not download it
+if [ ! -f /var/www/html/wp-config-sample.php ]; then
+    echo "[WordPress Core] WordPress not found, downloading..."
+    wp core download --allow-root --force
+    echo "[WordPress Core] WordPress downloaded successfully"
+fi
+
+# Generate wp-config.php if it doesn't exist
+if [ ! -f /var/www/html/wp-config.php ]; then
+    echo "[WordPress Core] Generating wp-config.php..."
+    wp config create \
+        --dbname=$WORDPRESS_DB_NAME \
+        --dbuser=$WORDPRESS_DB_USER \
+        --dbpass=$WORDPRESS_DB_PASSWORD \
+        --dbhost=$WORDPRESS_DB_HOST \
+        --dbprefix=$WORDPRESS_TABLE_PREFIX \
+        --allow-root
+fi
+
+# Now verify WordPress database connectivity
+echo "[WordPress Core] Verifying WordPress database connectivity..."
+if ! wp db check --allow-root 2>/dev/null; then
+    echo "[WordPress Core] WordPress database check failed, retrying in 5 seconds..."
+    sleep 5
+    if ! wp db check --allow-root 2>/dev/null; then
+        echo "[WordPress Core] ERROR: WordPress database connectivity failed"
+        echo "[WordPress Core] Attempting to create database if it doesn't exist..."
+        wp db create --allow-root 2>/dev/null || echo "[WordPress Core] Database creation failed or database already exists"
+        sleep 2
+        if ! wp db check --allow-root 2>/dev/null; then
+            echo "[WordPress Core] FINAL ERROR: Cannot establish database connection"
+            exit 1
+        fi
     fi
 fi
 
-# Create wp-config.php if not present
-if [ ! -e "$WP_CONFIG_FILE" ]; then
-    echo "[SetupWordPressCore] $WP_CONFIG_FILE not found. Creating..."
-    if [ -f "${WP_PATH}/wp-config-docker.php" ]; then
-        echo "[SetupWordPressCore] Using ${WP_PATH}/wp-config-docker.php as template."
-        cp "${WP_PATH}/wp-config-docker.php" "$WP_CONFIG_FILE"
-    elif [ -f "/usr/src/wordpress/wp-config-docker.php" ]; then
-        echo "[SetupWordPressCore] Using /usr/src/wordpress/wp-config-docker.php as template."
-        cp "/usr/src/wordpress/wp-config-docker.php" "$WP_CONFIG_FILE"
+# Configure debug settings based on environment
+if [ "$WORDPRESS_ENV" = "development" ]; then
+    echo "[WordPress Core] Configuring DEBUG settings for development environment..."
+    
+    # Force direct file system method to avoid FTP prompts
+    if ! wp config has FS_METHOD --allow-root 2>/dev/null; then
+        wp config set FS_METHOD direct --allow-root
     else
-        echo "[SetupWordPressCore ERROR] wp-config-docker.php not found. Cannot create $WP_CONFIG_FILE."
-        exit 1
+        wp config set FS_METHOD direct --allow-root
     fi
-
-    # Configure database settings
-    sed -i -e "s/database_name_here/${WORDPRESS_DB_NAME}/g" \
-        -e "s/username_here/${WORDPRESS_DB_USER}/g" \
-        -e "s/password_here/${WORDPRESS_DB_PASSWORD}/g" \
-        -e "s/localhost/${WORDPRESS_DB_HOST}/g" \
-        "$WP_CONFIG_FILE"
-
-    # Configure table prefix if set
-    if [ -n "${WORDPRESS_TABLE_PREFIX:-}" ]; then
-        sed -i -e "s/\\$table_prefix = \'wp_\';/\\$table_prefix = \'$WORDPRESS_TABLE_PREFIX\';/g" "$WP_CONFIG_FILE"
+    
+    # Enable debug mode - check if constants exist first
+    if ! wp config has WP_DEBUG --allow-root 2>/dev/null; then
+        wp config set WP_DEBUG true --raw --allow-root
+    else
+        wp config set WP_DEBUG true --raw --allow-root
     fi
-    echo "[SetupWordPressCore] $WP_CONFIG_FILE created. Salts will be configured after core install."
+    
+    if ! wp config has WP_DEBUG_LOG --allow-root 2>/dev/null; then
+        wp config set WP_DEBUG_LOG true --raw --allow-root
+    else
+        wp config set WP_DEBUG_LOG true --raw --allow-root
+    fi
+    
+    # Control warnings display based on WORDPRESS_SHOW_WARNINGS
+    if [ "${WORDPRESS_SHOW_WARNINGS:-false}" = "true" ]; then
+        echo "[WordPress Core] Warnings display enabled"
+        if ! wp config has WP_DEBUG_DISPLAY --allow-root 2>/dev/null; then
+            wp config set WP_DEBUG_DISPLAY true --raw --allow-root
+        else
+            wp config set WP_DEBUG_DISPLAY true --raw --allow-root
+        fi
+    else
+        echo "[WordPress Core] Warnings display disabled"
+        if ! wp config has WP_DEBUG_DISPLAY --allow-root 2>/dev/null; then
+            wp config set WP_DEBUG_DISPLAY false --raw --allow-root
+        else
+            wp config set WP_DEBUG_DISPLAY false --raw --allow-root
+        fi
+    fi
+    
+    if ! wp config has SCRIPT_DEBUG --allow-root 2>/dev/null; then
+        wp config set SCRIPT_DEBUG true --raw --allow-root
+    else
+        wp config set SCRIPT_DEBUG true --raw --allow-root
+    fi
+    
+    if ! wp config has SAVEQUERIES --allow-root 2>/dev/null; then
+        wp config set SAVEQUERIES true --raw --allow-root
+    else
+        wp config set SAVEQUERIES true --raw --allow-root
+    fi
+    
+    # Remove WP_CACHE if it exists to avoid conflicts
+    if wp config has WP_CACHE --allow-root 2>/dev/null; then
+        wp config delete WP_CACHE --allow-root 2>/dev/null || true
+    fi
+    
+    # Create debug directory if it doesn't exist
+    mkdir -p /var/www/html/wp-content/debug
+    chmod 755 /var/www/html/wp-content/debug
+    
+    echo "[WordPress Core] DEBUG mode enabled for development"
+    
+elif [ "$WORDPRESS_ENV" = "production" ]; then
+    echo "[WordPress Core] Configuring settings for production environment..."
+    
+    # Disable debug mode - check if constants exist first
+    if ! wp config has WP_DEBUG --allow-root 2>/dev/null; then
+        wp config set WP_DEBUG false --raw --allow-root
+    else
+        wp config set WP_DEBUG false --raw --allow-root
+    fi
+    
+    if ! wp config has WP_DEBUG_LOG --allow-root 2>/dev/null; then
+        wp config set WP_DEBUG_LOG false --raw --allow-root
+    else
+        wp config set WP_DEBUG_LOG false --raw --allow-root
+    fi
+    
+    # In production, respect WORDPRESS_SHOW_WARNINGS for critical debugging
+    if [ "${WORDPRESS_SHOW_WARNINGS:-false}" = "true" ]; then
+        echo "[WordPress Core] Warnings display enabled for production debugging"
+        if ! wp config has WP_DEBUG_DISPLAY --allow-root 2>/dev/null; then
+            wp config set WP_DEBUG_DISPLAY true --raw --allow-root
+        else
+            wp config set WP_DEBUG_DISPLAY true --raw --allow-root
+        fi
+    else
+        echo "[WordPress Core] Warnings display disabled for production"
+        if ! wp config has WP_DEBUG_DISPLAY --allow-root 2>/dev/null; then
+            wp config set WP_DEBUG_DISPLAY false --raw --allow-root
+        else
+            wp config set WP_DEBUG_DISPLAY false --raw --allow-root
+        fi
+    fi
+    
+    if ! wp config has SCRIPT_DEBUG --allow-root 2>/dev/null; then
+        wp config set SCRIPT_DEBUG false --raw --allow-root
+    else
+        wp config set SCRIPT_DEBUG false --raw --allow-root
+    fi
+    
+    if ! wp config has SAVEQUERIES --allow-root 2>/dev/null; then
+        wp config set SAVEQUERIES false --raw --allow-root
+    else
+        wp config set SAVEQUERIES false --raw --allow-root
+    fi
+    
+    # Enable WP_CACHE for production
+    if ! wp config has WP_CACHE --allow-root 2>/dev/null; then
+        wp config set WP_CACHE true --raw --allow-root
+    else
+        wp config set WP_CACHE true --raw --allow-root
+    fi
+    
+    # Disable file modifications
+    if ! wp config has DISALLOW_FILE_EDIT --allow-root 2>/dev/null; then
+        wp config set DISALLOW_FILE_EDIT true --raw --allow-root
+    else
+        wp config set DISALLOW_FILE_EDIT true --raw --allow-root
+    fi
+    
+    if ! wp config has DISALLOW_FILE_MODS --allow-root 2>/dev/null; then
+        wp config set DISALLOW_FILE_MODS true --raw --allow-root
+    else
+        wp config set DISALLOW_FILE_MODS true --raw --allow-root
+    fi
+    
+    if ! wp config has AUTOMATIC_UPDATER_DISABLED --allow-root 2>/dev/null; then
+        wp config set AUTOMATIC_UPDATER_DISABLED true --raw --allow-root
+    else
+        wp config set AUTOMATIC_UPDATER_DISABLED true --raw --allow-root
+    fi
+    
+    echo "[WordPress Core] Production settings applied"
+fi
+
+# Set environment variable
+if ! wp config has WORDPRESS_ENV --allow-root 2>/dev/null; then
+    wp config set WORDPRESS_ENV "$WORDPRESS_ENV" --allow-root
+else
+    wp config set WORDPRESS_ENV "$WORDPRESS_ENV" --allow-root
 fi
 
 # Install WordPress if not already installed
-if ! wp core is-installed --path="$WP_PATH" --allow-root --quiet; then
-    echo "[SetupWordPressCore] WordPress core is not installed. Installing..."
-    if [ -z "${WORDPRESS_URL:-}" ] || [ -z "${WORDPRESS_TITLE:-}" ] || \
-       [ -z "${WORDPRESS_ADMIN_USER:-}" ] || [ -z "${WORDPRESS_ADMIN_PASSWORD:-}" ] || \
-       [ -z "${WORDPRESS_ADMIN_EMAIL:-}" ]; then
-        echo "[SetupWordPressCore ERROR] Missing required environment variables for WordPress installation."
-        exit 1
-    fi
-
-    wp core install --url="$WORDPRESS_URL" \
-                    --title="$WORDPRESS_TITLE" \
-                    --admin_user="$WORDPRESS_ADMIN_USER" \
-                    --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
-                    --admin_email="$WORDPRESS_ADMIN_EMAIL" \
-                    --skip-email \
-                    --path="$WP_PATH" --allow-root
-    echo "[SetupWordPressCore] WordPress core installed."
-
-    echo "[SetupWordPressCore] Configuring salts in $WP_CONFIG_FILE..."
-    wp config shuffle-salts --path="$WP_PATH" --allow-root --quiet || echo "[SetupWordPressCore WARNING] Failed to shuffle salts. May need to be done manually if not already set."
+if ! wp core is-installed --allow-root 2>/dev/null; then
+    echo "[WordPress Core] Installing WordPress..."
+    wp core install \
+        --url="$WORDPRESS_URL" \
+        --title="$WORDPRESS_TITLE" \
+        --admin_user="$WORDPRESS_ADMIN_USER" \
+        --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
+        --admin_email="$WORDPRESS_ADMIN_EMAIL" \
+        --allow-root
+    
+    echo "[WordPress Core] WordPress installation completed"
 else
-    echo "[SetupWordPressCore] WordPress is already installed."
+    echo "[WordPress Core] WordPress already installed"
 fi
 
-echo "[SetupWordPressCore] WordPress core setup complete."
+echo "[WordPress Core] WordPress core setup completed"
