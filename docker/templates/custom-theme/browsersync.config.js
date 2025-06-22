@@ -1,5 +1,5 @@
 module.exports = {
-  proxy: "localhost:{{WORDPRESS_HOST_PORT}}",
+  proxy: "localhost:8080",
   files: [
     "**/*.css",
     "**/*.php",

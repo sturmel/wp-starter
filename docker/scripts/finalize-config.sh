@@ -34,4 +34,32 @@ else
     echo "[FinalizeConfig WARNING] $WP_CONFIG_FILE not found. Cannot apply configuration."
 fi
 
+echo "[FinalizeConfig] Setting up Wordfence directories and permissions..."
+
+# Create Wordfence directories with proper permissions
+mkdir -p /var/www/html/wp-content/wflogs
+mkdir -p /var/www/html/wp-content/wfcache
+
+# Set ownership and permissions for Wordfence
+chown -R www-data:www-data /var/www/html/wp-content/wflogs
+chown -R www-data:www-data /var/www/html/wp-content/wfcache
+chmod -R 755 /var/www/html/wp-content/wflogs
+chmod -R 755 /var/www/html/wp-content/wfcache
+
+# Create the ips.php file if it doesn't exist
+if [ ! -f /var/www/html/wp-content/wflogs/ips.php ]; then
+    touch /var/www/html/wp-content/wflogs/ips.php
+    chown www-data:www-data /var/www/html/wp-content/wflogs/ips.php
+    chmod 644 /var/www/html/wp-content/wflogs/ips.php
+    echo "[FinalizeConfig] Created Wordfence ips.php file with proper permissions"
+fi
+
+# Also ensure uploads directory has correct permissions
+mkdir -p /var/www/html/wp-content/uploads
+chown -R www-data:www-data /var/www/html/wp-content/uploads
+chmod -R 755 /var/www/html/wp-content/uploads
+
+echo "[FinalizeConfig] Wordfence and uploads directories configured successfully"
+
+echo "[FinalizeConfig] Video upload configuration completed"
 echo "[FinalizeConfig] WordPress configuration finalized for environment: $CURRENT_ENV"

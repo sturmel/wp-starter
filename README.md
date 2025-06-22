@@ -9,6 +9,7 @@ Le système génère automatiquement un **thème enfant intelligent** basé sur 
 ### **🐳 Environnement de Développement Dockerisé**
 *   **Services Complets** : WordPress, MySQL, et Redis gérés via `docker compose`
 *   **Installation Automatisée** : WordPress configuré automatiquement au premier lancement
+*   **Support Reverse Proxy Natif** : Correction automatique de la détection SSL (`HTTPS`) lorsque le site est derrière un reverse proxy, garantissant que les URLs et les assets sont servis avec le bon protocole.
 *   **Contenu Persistant** : Le dossier `wp-content` est mappé pour conserver vos données entre les sessions
 *   **Outils Préinstallés** : WP-CLI, Composer, Node.js 22.10.0 via NVM, Git, msmtp
 
@@ -30,13 +31,13 @@ Le système génère automatiquement un **thème enfant intelligent** basé sur 
 *   **Configuration Avancée** : Webpack configuré pour développement et production
 *   **Build Intelligente selon l'Environnement** : 
     *   **Mode développement** : Builds dans `dev_build/` avec source maps et hot reload
-    *   **Mode production** : Builds optimisées dans `dist/` avec minification avancée
+    *   **Mode production** : Builds hautement optimisées dans `dist/` avec minification agressive, tree-shaking et optimisations avancées.
 *   **Hot Reload** : Compilation automatique en mode watch avec BrowserSync
-*   **Optimisation Assets** : 
+*   **Optimisation Poussée des Assets** : 
+    *   **JavaScript** : Minification avancée avec `TerserPlugin` (suppression des `console.log`, code mort) et support ES6+.
+    *   **CSS** : Optimisation extrême avec `CssMinimizerPlugin` et PostCSS.
+    *   **Tree Shaking** : Suppression automatique du code JavaScript non utilisé en production.
     *   Clean automatique des builds précédentes
-    *   Cache busting avec `filemtime()` pour les assets PHP
-    *   Minification JavaScript avec Terser
-    *   Optimisation CSS avec CssMinimizerPlugin
 
 ### **🎯 Frontend Moderne et Optimisé**
 *   **Tailwind CSS v4** : Framework utility-first avec la nouvelle architecture
