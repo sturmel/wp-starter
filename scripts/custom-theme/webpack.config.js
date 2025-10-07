@@ -10,7 +10,6 @@ module.exports = (env, argv) => {
 
   return {
     entry: {
-      styles: "./assets/css/styles.css",
       scripts: "./assets/js/scripts.js"
     },
     output: {
@@ -19,7 +18,7 @@ module.exports = (env, argv) => {
       clean: true,
     },
     mode: isProduction ? "production" : "development",
-    devtool: "source-map",
+    devtool: isProduction ? false : "source-map",
     module: {
       rules: [
         {
@@ -36,28 +35,14 @@ module.exports = (env, argv) => {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
-            {
-              loader: "css-loader",
-              options: {
-                importLoaders: 1,
-                sourceMap: true
-              }
-            },
+            "css-loader",
             {
               loader: "postcss-loader",
               options: {
-                sourceMap: true,
                 postcssOptions: {
                   plugins: [
                     require("postcss-import"),
-                    [require("@tailwindcss/postcss"), {
-                      content: [
-                        "./views/**/*.twig",
-                        "./*.php",
-                        "./assets/js/**/*.js",
-                        "./tailwind-safelist.txt"
-                      ]
-                    }],
+                    require("@tailwindcss/postcss"),
                     require("autoprefixer"),
                   ],
                 },
@@ -73,7 +58,7 @@ module.exports = (env, argv) => {
       }),
       ...(argv.mode === "development" ? [
         new BrowserSyncPlugin({
-          proxy: "localhost:8080",
+          proxy: "localhost:{{WORDPRESS_HOST_PORT}}",
           files: [
             "**/*.php",
             "**/*.twig",
@@ -92,21 +77,9 @@ module.exports = (env, argv) => {
       minimizer: isProduction ? [
         new TerserPlugin({
           terserOptions: {
-            compress: {
-              drop_console: true, // Retire les console.log en production
-              drop_debugger: true,
-              pure_funcs: ['console.log', 'console.info', 'console.debug'], // Retire ces fonctions
-              passes: 2, // Plusieurs passes d'optimisation
-            },
-            mangle: {
-              safari10: true, // Compatibilité Safari 10
-            },
-            format: {
-              comments: false, // Retire tous les commentaires
-            },
+            compress: true,
+            mangle: true,
           },
-          extractComments: false, // Pas de fichier .LICENSE.txt séparé
-          parallel: true, // Utilise plusieurs processeurs
         }),
         new CssMinimizerPlugin({
           minimizerOptions: {
@@ -114,29 +87,12 @@ module.exports = (env, argv) => {
               "default",
               {
                 discardComments: { removeAll: true },
-                normalizeWhitespace: true,
-                colormin: true, // Optimise les couleurs
-                convertValues: true, // Convertit les valeurs (px -> rem si plus court)
-                discardDuplicates: true, // Retire les règles dupliquées
-                discardEmpty: true, // Retire les règles vides
-                mergeRules: true, // Fusionne les règles identiques
-                minifySelectors: true, // Optimise les sélecteurs
               },
             ],
           },
-          parallel: true, // Utilise plusieurs processeurs
         }),
       ] : [],
-      // Tree shaking pour supprimer le code mort
-      usedExports: isProduction,
-      sideEffects: false, // Indique que vos modules n'ont pas d'effets de bord
     },
-    // Alertes de performance en production
-    performance: isProduction ? {
-      hints: "warning",
-      maxEntrypointSize: 500000, // 500KB
-      maxAssetSize: 300000, // 300KB
-    } : false,
     watch: argv.mode === "development",
     watchOptions: {
       aggregateTimeout: 300,

@@ -1,22 +1,25 @@
 .env
 
+# WordPress configuration (auto-generated from .env)
+wordpress/wp-config.php
+
 # Redis object cache file (auto-generated)
-wp-content/object-cache.php
+wordpress/wp-content/object-cache.php
 
 # WordPress uploads
-wp-content/uploads/
+wordpress/wp-content/uploads/
 
 # WordPress cache
-wp-content/cache/
+wordpress/wp-content/cache/
 
 # WordPress debug logs
-wp-content/debug.log
+wordpress/wp-content/debug.log
 
 # Node modules in themes
-wp-content/themes/*/node_modules/
-wp-content/themes/*/package-lock.json
-wp-content/themes/*/dist/
-wp-content/themes/*/dev_build/
+wordpress/wp-content/themes/*/node_modules/
+wordpress/wp-content/themes/*/package-lock.json
+wordpress/wp-content/themes/*/dist/
+wordpress/wp-content/themes/*/dev_build/
 
 # Wordfence logs
-wp-content/wflogs/
+wordpress/wp-content/wflogs/
